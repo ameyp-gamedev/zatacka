@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <title>Zataka</title>
+    <script src="bits.js"></script>
+    <script src="source.js"></script>
+    <style type="text/css">
+      canvas { border: 1px solid black }
+    </style>
+  </head>
+  <body onload="init();"
+	onkeydown="onKeyDown(event);"
+	onkeyup="onKeyUp(event);">
+    <div id="menu">
+      <button type="button" onclick="startGame();">Start</button>
+    </div>
+    <div id="canvas">
+      <canvas id="renderer" width="800", height="600">
+      </canvas>
+    </div>
+  </body>
+</html>
+    
