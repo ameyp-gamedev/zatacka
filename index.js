@@ -2,9 +2,10 @@ var server = require("./server");
 var router = require("./router");
 var requestHandlers = require("./requestHandlers");
 
-var handler = {};
-handler["/"] = requestHandlers.start;
-handler["/join"] = requestHandlers.join;
-handler["/update"] = requestHandlers.update;
+var handlers = {};
+handlers[""] = requestHandlers.start;
+handlers["join"] = requestHandlers.join;
+handlers["update"] = requestHandlers.update;
+handlers["files"] = requestHandlers.files;
 
-server.start(router.route, handler);
+server.start(router.route, handlers);
