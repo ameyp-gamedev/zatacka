@@ -4,7 +4,7 @@ var requestHandlers = require("./requestHandlers");
 
 var handler = {};
 handler["/"] = requestHandlers.start;
-handler["/start"] = requestHandlers.start;
-handler["/pause"] = requestHandlers.pause;
+handler["/join"] = requestHandlers.join;
+handler["/update"] = requestHandlers.update;
 
 server.start(router.route, handler);
