@@ -53,6 +53,19 @@ function startGame() {
     setInterval(Tick, deltaTime);
 }
 
+function joinGame() {
+    var request = {
+	'name': 'Amey',
+	'color': 'blue'
+    };
+    $.post('join',
+	   JSON.stringify(request),
+	   function(data) {
+	       alert("success, response = " + JSON.stringify(data));
+	   },
+	   'json');
+}
+
 function onKeyDown(event) {
     // console.log("KeyDown: " + event.keyCode);
     if ((event.keyCode == 37) && (me.left == false)) {

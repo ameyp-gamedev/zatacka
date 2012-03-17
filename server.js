@@ -2,8 +2,6 @@ var http = require("http");
 
 function start(route, handlers) {
     function onRequest(request, response) {
-	console.log("Request = " + request);
-	console.log("Url = " + request.url);
 	route(handlers, request, response);
     }
 

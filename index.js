@@ -3,7 +3,7 @@ var router = require("./router");
 var requestHandlers = require("./requestHandlers");
 
 var handlers = {};
-handlers[""] = requestHandlers.start;
+handlers[""] = requestHandlers.init;
 handlers["join"] = requestHandlers.join;
 handlers["update"] = requestHandlers.update;
 handlers["files"] = requestHandlers.files;

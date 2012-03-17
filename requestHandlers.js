@@ -1,8 +1,11 @@
 var fs = require('fs');
 var url = require('url');
+var querystring = require('querystring');
+var util = require('util');
+var room = require('./room.js');
 
-function start(request, response) {
-    console.log("Request handler 'start' was called.");
+function init(request, response) {
+    // console.log("Request handler 'init' was called.");
     response.writeHead(200, {"Content-Type": "text/html"});
     fs.readFile('./client/index.html', function (err, data) {
 		    if (err) {
@@ -14,10 +17,24 @@ function start(request, response) {
 }
 
 function join(request, response) {
-    console.log("Request handler 'pause' was called.");
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    response.write("Paused");
-    response.end();
+    // console.log("Request handler 'join' was called.");
+    if (request.method == 'POST') {
+	var postData = '';
+
+	console.log("[200] " + request.method + " to " + request.url);
+
+	request.addListener("data", function (postDataChunk) {
+				postData += postDataChunk;
+			    });
+
+	request.addListener("end", function() {
+				console.log("Received POST: " + postData);
+				var data = JSON.parse(postData);
+				response.writeHead(200, {'Content-Type': 'text/json'});
+				response.write(JSON.stringify(data));
+				response.end('\n');
+			    });
+    }
 }
 
 function update(request, response) {
@@ -57,7 +74,7 @@ function _getFileExtension(filepath) {
     return filename.split('.')[1];
 }
 
-exports.start = start;
+exports.init = init;
 exports.join = join;
 exports.update = update;
 exports.files = files;
