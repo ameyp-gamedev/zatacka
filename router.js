@@ -1,4 +1,7 @@
-function route(handlers, pathname, response) {
+var url = require('url');
+
+function route(handlers, request, response) {
+    var pathname = url.parse(request.url).pathname;
     console.log("About to route a request for " + pathname);
 
     var components = pathname.split('/');
@@ -16,7 +19,7 @@ function route(handlers, pathname, response) {
 	arguments = components.slice(2);
 
     if (typeof handlers[root] == 'function') {
-	handlers[root](arguments, response);
+	handlers[root](request, response);
     }
     else {
 	console.log("No request handler found for " + pathname);
