@@ -56,6 +56,9 @@ function files(request, response) {
 		    if (file_ext == 'js') {
 			response.writeHead(200, {"Content-Type": "application/javascript"});
 		    }
+		    else if (file_ext == 'css') {
+			response.writeHead(200, {"Content-Type": "text/css"});
+		    }
 		    else {
 			response.writeHead(200, {"Content-Type": "text/plain"});
 		    }

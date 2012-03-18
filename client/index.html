@@ -4,21 +4,23 @@
     <script src="files/jquery.js"></script>
     <script src="files/bits.js"></script>
     <script src="files/source.js"></script>
-    <style type="text/css">
-      canvas { border: 1px solid black }
-    </style>
+    <link rel="stylesheet" type="text/css" href="files/css/grid.css" />
+    <link rel="stylesheet" type="text/css" href="files/css/style.css" />
   </head>
   <body onload="init();"
 	onkeydown="onKeyDown(event);"
 	onkeyup="onKeyUp(event);">
-    <div id="menu">
-      <button type="button" onclick="startGame();">Start</button>
-      <button type="button" onclick="joinGame();">Join</button>
+    <div class="row">
+      <div id="canvas" class="column grid_14">
+	<canvas id="renderer" width="800", height="600">
+	</canvas>
+      </div>
+      <div id="menu" class="column grid_2">
+	<button type="button" onclick="startGame();">Start</button>
+	<button type="button" onclick="joinGame();">Join</button>
+      </div>
     </div>
-    <div id="canvas">
-      <canvas id="renderer" width="800", height="600">
-      </canvas>
-    </div>
+
   </body>
 </html>
     
