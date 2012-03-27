@@ -8,17 +8,17 @@ var colors;
 Array.prototype.erase = function(name, property) {
     var i = -1;
 
-    if (this[0].hasOwnProperty(property)) {
+    if (property != null) {
 	var value = null;
 
 	for (i = 0; i < this.length; i += 1) {
-	    if (typeof(this[i].property == 'function'))
-		value = this[i].property();
-	    else
-		value = this[i].property;
-
-	    if ( (this[i].hasOwnProperty(property)) && (name == value) )
+	    if ( (typeof(this[i].property) == 'function') &&
+		(name == this[i].property()) ) {
 		break;
+	    }
+	    else if (name == this[i].property) {
+		break;
+	    }
 	}
     }
     else
