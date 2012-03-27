@@ -7,35 +7,37 @@ var colors;
 
 Array.prototype.erase = function(name, property) {
     var i = -1;
+    var element = null;
 
     if (property != null) {
-	var value = null;
-
 	for (i = 0; i < this.length; i += 1) {
-	    if ( (typeof(this[i].property) == 'function') &&
-		(name == this[i].property()) ) {
+	    if ( (typeof(this[i][property]) == 'function') &&
+		(name == this[i][property]()) ) {
+		element = this[i];
 		break;
 	    }
-	    else if (name == this[i].property) {
+	    else if (name == this[i][property]) {
+		element = this[i];
 		break;
 	    }
 	}
     }
-    else
+    else {
 	i = this.indexOf(name);
-
-    // Element was not found
-    if ( (i == -1) || (i == this.length) ) {
-	return false;
+	if (i != -1) {
+	    element = this[i];
+	}
     }
 
-    while (i < this.length - 1) {
-	this[i] = this[i+1];
-	i += 1;
+    if (element != null) {
+	while (i < this.length - 1) {
+	    this[i] = this[i+1];
+	    i += 1;
+	}
+	this.pop();
     }
-    this.pop();
 
-    return true;
+    return element;
 };
 
 function initialize() {
@@ -63,18 +65,9 @@ function initialize() {
     };
 
     players.remove = function (id) {
-	for (var i = 0; i < players.length; i++) {
-	    if (players[i].get_id() == id) {
-		colors.push(players[i].get_color());
-
-		for (var j = i; j < players.length-1; j += 1) {
-		    players[j] = players[j+1];
-		}
-		players.pop();
-
-		return;
-	    }
-	}
+	var old_player = players.erase(id, 'get_id');
+	colors.push(players.erase(id, 'get_id')
+		           .get_color());
     };
 
     players.next_id = function () {
