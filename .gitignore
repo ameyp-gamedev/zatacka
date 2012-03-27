@@ -1,2 +1,4 @@
 *~
+*.cmd
 node_modules/swank-js
+node_modules/.bin

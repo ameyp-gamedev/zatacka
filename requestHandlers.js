@@ -4,6 +4,18 @@ var querystring = require('querystring');
 var util = require('util');
 var room = require('./room.js');
 
+function post_to_json(request, callback) {
+    var postData = '';
+
+    request.addListener("data", function (postDataChunk) {
+			    postData += postDataChunk;
+			});
+
+    request.addListener("end", function() {
+			    callback(JSON.parse(postData));
+			});
+}
+
 function init(request, response) {
     // console.log("Request handler 'init' was called.");
     response.writeHead(200, {"Content-Type": "text/html"});
@@ -19,21 +31,12 @@ function init(request, response) {
 function join(request, response) {
     // console.log("Request handler 'join' was called.");
     if (request.method == 'POST') {
-	var postData = '';
-
 	console.log("[200] " + request.method + " to " + request.url);
-
-	request.addListener("data", function (postDataChunk) {
-				postData += postDataChunk;
-			    });
-
-	request.addListener("end", function() {
-				console.log("Received POST: " + postData);
-				var data = JSON.parse(postData);
-				response.writeHead(200, {'Content-Type': 'text/json'});
-				response.write(JSON.stringify(data));
-				response.end('\n');
-			    });
+	post_to_json(request, function(data) {
+			 response.writeHead(200, {'Content-Type': 'text/json'});
+			 response.write(JSON.stringify(data));
+			 response.end('\n');
+	});
     }
 }
 
