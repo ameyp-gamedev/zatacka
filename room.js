@@ -7,37 +7,26 @@ var colors;
 
 Array.prototype.erase = function(name, property) {
     var i = -1;
-    var element = null;
 
     if (property != null) {
 	for (i = 0; i < this.length; i += 1) {
 	    if ( (typeof(this[i][property]) == 'function') &&
 		(name == this[i][property]()) ) {
-		element = this[i];
-		break;
+		return this.splice(i, 1)[0];
 	    }
 	    else if (name == this[i][property]) {
-		element = this[i];
-		break;
+		return this.splice(i, 1)[0];
 	    }
 	}
     }
     else {
 	i = this.indexOf(name);
 	if (i != -1) {
-	    element = this[i];
+	    return this.splice(i, 1)[0];
 	}
     }
 
-    if (element != null) {
-	while (i < this.length - 1) {
-	    this[i] = this[i+1];
-	    i += 1;
-	}
-	this.pop();
-    }
-
-    return element;
+    return null;
 };
 
 function initialize() {
