@@ -29,8 +29,8 @@ Array.prototype.erase = function(name, property) {
     return null;
 };
 
-function initialize() {
-    players = new Array();
+var initialize = function () {
+    players = [];
     colors = ["RED", "BLUE", "GREEN", "BLACK", "YELLOW"];
 
     players.add = function (new_player) {
@@ -65,22 +65,23 @@ function initialize() {
 	else
 	    return -1;
     };
-}
+};
 
 // returns valid id if joining was successful
 // otherwise returns -1
-function join(name, color) {
+var join = function (name, color) {
     var next_id = players.next_id();
     if (next_id != -1) {
 	players.add(player.Player(next_id, name, color));
     }
 
     return next_id;
-}
+};
 
-function leave(id) {
+var leave = function (id) {
     players.remove(id);
-}
+};
 
 exports.join = join;
 exports.leave = leave;
+exports.initialize = initialize;
