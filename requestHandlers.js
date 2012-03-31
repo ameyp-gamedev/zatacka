@@ -6,6 +6,10 @@ var querystring = require('querystring');
 var util = require('util');
 var room = require('./room.js');
 
+// todo - remove once multiple rooms are supported.
+
+room.initialize();
+
 function post_to_json(request, callback) {
     var postData = '';
 
@@ -26,8 +30,11 @@ function init(request, response) {
 		    if (err) {
 			throw err;
 		    }
+		    var colors = room.get_colors();
 		    var html_gen = jade.compile(data);
-		    response.write(html_gen());
+		    response.write(html_gen({
+						'colors': colors
+					    }));
 		    response.end();
 		});
 }

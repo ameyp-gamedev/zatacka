@@ -9,12 +9,23 @@ html
     link(rel="stylesheet", type="text/css", href="files/css/style.css")
 
   body(onload="init();",
-       onkeydown="onKeyDown(event);",
-       onkeyup="onKeyUp(event);")
-    div.row
-        div#canvas.column.grid_14
-            canvas#renderer(width="800", height="600")
-        div#menu.column.grid_2
+     onkeydown="onKeyDown(event);",
+     onkeyup="onKeyUp(event);")
+  .row
+      .column.grid_14#canvas
+        canvas#renderer(width="800", height="600")
+      .column.grid_2#menu
+        .row
+          .column.grid_2
             button(type="button", onclick="startGame();") Start
             button(type="button", onclick="joinGame();") Join
+        .row
+          .column.grid_2
+            - for (var key in colors) {
+              - if (typeof (colors[key]) === 'string') {
+                  input(type="checkbox", value=colors[key])
+                  =colors[key]
+                  br
+              - }
+            - }
     

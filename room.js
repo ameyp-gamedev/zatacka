@@ -67,8 +67,7 @@ var initialize = function () {
     };
 };
 
-// returns valid id if joining was successful
-// otherwise returns -1
+// returns valid id if joining was successful, otherwise -1
 var join = function (name, color) {
     var next_id = players.next_id();
     if (next_id != -1) {
@@ -82,6 +81,11 @@ var leave = function (id) {
     players.remove(id);
 };
 
+var get_colors = function() {
+    return colors;
+}
+
 exports.join = join;
 exports.leave = leave;
 exports.initialize = initialize;
+exports.get_colors = get_colors;
