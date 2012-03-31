@@ -1,5 +1,7 @@
 var fs = require('fs');
 var url = require('url');
+var jade = require('jade');
+
 var querystring = require('querystring');
 var util = require('util');
 var room = require('./room.js');
@@ -19,11 +21,13 @@ function post_to_json(request, callback) {
 function init(request, response) {
     // console.log("Request handler 'init' was called.");
     response.writeHead(200, {"Content-Type": "text/html"});
-    fs.readFile('./client/index.html', function (err, data) {
+    fs.readFile('./client/index.jade',
+		function (err, data) {
 		    if (err) {
 			throw err;
 		    }
-		    response.write(data);
+		    var html_gen = jade.compile(data);
+		    response.write(html_gen());
 		    response.end();
 		});
 }
