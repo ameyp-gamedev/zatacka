@@ -10,15 +10,15 @@ var room = require('./room.js');
 
 room.initialize();
 
-function post_to_json(request, callback) {
+function convertPostData(parameters) {
     var postData = '';
 
-    request.addListener("data", function (postDataChunk) {
+    parameters.request.addListener("data", function (postDataChunk) {
 			    postData += postDataChunk;
 			});
 
-    request.addListener("end", function() {
-			    callback(JSON.parse(postData));
+    parameters.request.addListener("end", function() {
+			    parameters.callback(parameters.json === true ? JSON.parse(postData) : postData);
 			});
 }
 
@@ -30,24 +30,42 @@ function init(request, response) {
 		    if (err) {
 			throw err;
 		    }
-		    var colors = room.get_colors();
+
 		    var html_gen = jade.compile(data);
-		    response.write(html_gen({
-						'colors': colors
-					    }));
+		    response.write(html_gen());
 		    response.end();
 		});
 }
+
+function getColors(request, response) {
+    if (request.method == 'POST') {
+	// console.log("[200] " + request.method + " to " + request.url);
+	convertPostData({
+			    'request': request,
+			    'callback': function (data) {
+				response.writeHead(200, {"Content-Type": "text/json"});
+				var colors = room.get_colors();
+				response.write(JSON.stringify(colors));
+				response.end('\n');
+			    },
+			    'json': false
+			});
+    }
+};
 
 function join(request, response) {
     // console.log("Request handler 'join' was called.");
     if (request.method == 'POST') {
 	console.log("[200] " + request.method + " to " + request.url);
-	post_to_json(request, function(data) {
-			 response.writeHead(200, {'Content-Type': 'text/json'});
-			 response.write(JSON.stringify(data));
-			 response.end('\n');
-	});
+	convertPostData({
+			    'request': request,
+			    'callback': function (data) {
+				response.writeHead(200, {'Content-Type': 'text/json'});
+				response.write(JSON.stringify(data));
+				response.end('\n');
+			    },
+			    'json': true
+			});
     }
 }
 
@@ -95,3 +113,4 @@ exports.init = init;
 exports.join = join;
 exports.update = update;
 exports.files = files;
+exports.getColors = getColors;

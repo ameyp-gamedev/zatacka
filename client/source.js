@@ -4,6 +4,7 @@ var players = new Array();
 var linearVelocity = 100.0;
 var angularVelocity = 0.1;
 var deltaTime = 33; 		//milli-secs
+var colorUpdateTime = 1000;
 var temp = new Array(480000);
 var pixelArray = new BitArray(480000);
 
@@ -13,12 +14,13 @@ var HEIGHT = 600;
 // to de removed
 var me;
 
-function init() {
+var init = function () {
     initializeContext();
     initializePlayers();
-}
+    setInterval(updateColors, colorUpdateTime);
+};
 
-function initializeContext() {
+var initializeContext = function () {
     var canvas = document.getElementById('renderer');
     if (canvas.getContext('2d')) {
 	console.log("Initialized the canvas context");
@@ -29,9 +31,9 @@ function initializeContext() {
 	var message = document.createTextNode("You need a browser that supports Canvas to run this");
 	box.appendChild(message);
     }
-}
+};
 
-function initializePlayers() {
+var initializePlayers = function () {
     // TODO make this a local variable and add it to players array for multiplayer
     me = {
 	location : {
@@ -45,15 +47,27 @@ function initializePlayers() {
 	inputQueue : new Array()
     };
     console.log("Initialized player (" + me.location.x + "," + me.location.y + ") with rotation " + me.rotation);
-}
+};
+
+var updateColors = function () {
+    $.post('getColors',
+	  function (colors) {
+	      var html = '';
+	      for (var i = 0; i < colors.length; i += 1) {
+		  html += "<input type=\"checkbox\" value=\""
+		      + colors[i] + "\" />" + colors[i] + "<br />";
+	      }
+	      $('#colors').html(html);
+	  });
+};
 
 // will be triggered from the server in multi
-function startGame() {
+var startGame = function () {
     // console.log("startGame");
     setInterval(Tick, deltaTime);
-}
+};
 
-function joinGame() {
+var joinGame = function () {
     var request = {
 	'name': 'Amey',
 	'color': 'blue'
@@ -61,12 +75,12 @@ function joinGame() {
     $.post('join',
 	   JSON.stringify(request),
 	   function(data) {
-	       alert("success, response = " + JSON.stringify(data));
+	       console.log("success, response = " + JSON.stringify(data));
 	   },
 	   'json');
-}
+};
 
-function onKeyDown(event) {
+var onKeyDown = function (event) {
     // console.log("KeyDown: " + event.keyCode);
     if ((event.keyCode == 37) && (me.left == false)) {
 	me.left = true;
@@ -74,9 +88,9 @@ function onKeyDown(event) {
     else if ((event.keyCode == 39) && (me.right == false)) {
 	me.right = true;
     }
-}
+};
 
-function onKeyUp(event) {
+var onKeyUp = function (event) {
     // console.log("KeyUp: " + event.keyCode);
     if ((event.keyCode == 37) && (me.left == true)) {
 	me.left = false;
@@ -84,16 +98,16 @@ function onKeyUp(event) {
     else if ((event.keyCode == 39) && (me.right == true)) {
 	me.right = false;
     }
-}
+};
 
-function Tick() {
+var Tick = function () {
     // console.log("Tick");
     if (me.alive) {
 	transformPlayer();
     }
-}
+};
 
-function transformPlayer() {
+var transformPlayer = function () {
     if ( (me.left == true) && (me.right == false) ) {
 	console.log("Turning left");
 	me.rotation -= angularVelocity;
@@ -172,13 +186,13 @@ function transformPlayer() {
 	 (collided == true) ) {
  	me.alive = false;
     }
-}
+};
 
-function getBitPosition(x, y) {
+var getBitPosition = function (x, y) {
 //    console.log("(" + x + "," + y + ") => " + (WIDTH*y + x));
     return (WIDTH*y + x);
-}
+};
 
-function lerp(beg, end, step) {
+var lerp = function (beg, end, step) {
     return Math.floor(beg + step * (end - beg));
-}
+};

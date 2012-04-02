@@ -2,7 +2,7 @@ var url = require('url');
 
 function route(handlers, request, response) {
     var pathname = url.parse(request.url).pathname;
-    console.log("About to route a request for " + pathname);
+    // console.log("About to route a request for " + pathname);
 
     var components = pathname.split('/');
     if (components.length < 2) {

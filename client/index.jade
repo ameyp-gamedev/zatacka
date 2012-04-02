@@ -20,12 +20,4 @@ html
             button(type="button", onclick="startGame();") Start
             button(type="button", onclick="joinGame();") Join
         .row
-          .column.grid_2
-            - for (var key in colors) {
-              - if (typeof (colors[key]) === 'string') {
-                  input(type="checkbox", value=colors[key])
-                  =colors[key]
-                  br
-              - }
-            - }
-    
+          .column.grid_2#colors

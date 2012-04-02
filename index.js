@@ -7,5 +7,6 @@ handlers[""] = requestHandlers.init;
 handlers["join"] = requestHandlers.join;
 handlers["update"] = requestHandlers.update;
 handlers["files"] = requestHandlers.files;
+handlers["getColors"] = requestHandlers.getColors;
 
 server.start(router.route, handlers);
