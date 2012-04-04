@@ -57,9 +57,11 @@ var initialize = function () {
     };
 
     players.remove = function (id) {
-	var old_player = players.erase(id, 'get_id');
-	colors.push(players.erase(id, 'get_id')
-		           .get_color());
+	if (players[id].hasOwnProperty('get_color')) {
+	    colors.push(players[id].get_color());
+	    players[id] = null;
+	    players.length -= 1;
+	}
     };
 
     players.next_id = function () {
