@@ -20,4 +20,8 @@ html
             button(type="button", onclick="startGame();") Start
             button(type="button", onclick="joinGame();") Join
         .row
+          .column.grid_2
+            p Player name
+              input(type="text", name="name").text#name
+        .row
           .column.grid_2#colors

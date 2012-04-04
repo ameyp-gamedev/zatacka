@@ -17,6 +17,7 @@ var me;
 var init = function () {
     initializeContext();
     initializePlayers();
+    updateColors();
     setInterval(updateColors, colorUpdateTime);
 };
 
@@ -53,9 +54,21 @@ var updateColors = function () {
     $.post('getColors',
 	  function (colors) {
 	      var html = '';
+	      var chosenColor = '';
+	      $('.color').each(function(index) {
+				   if ($(this).prop('checked') === true) {
+				       chosenColor = $(this).prop('value');
+				       return false; // breaks out of '.each'
+				   }
+				   return true;
+			       });
 	      for (var i = 0; i < colors.length; i += 1) {
-		  html += "<input type=\"checkbox\" value=\""
-		      + colors[i] + "\" />" + colors[i] + "<br />";
+		  html += "<input type=\"radio\""
+		      + " name=\"color\""
+		      + " class=\"color\""
+		      + " value=\"" + colors[i] + "\""
+		      + (chosenColor === colors[i] ? " checked" : "")
+		      + " />" + colors[i] + "<br />";
 	      }
 	      $('#colors').html(html);
 	  });
@@ -69,9 +82,15 @@ var startGame = function () {
 
 var joinGame = function () {
     var request = {
-	'name': 'Amey',
-	'color': 'blue'
     };
+    $('.color').each(function(index) {
+			 if ($(this).prop('checked') === true) {
+			     request.color = $(this).prop('value');
+			     return false;
+			 }
+			 return true;
+		     });
+    request.name = $('#name').val();
     $.post('join',
 	   JSON.stringify(request),
 	   function(data) {

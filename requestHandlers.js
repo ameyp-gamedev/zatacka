@@ -59,12 +59,15 @@ function join(request, response) {
 	console.log("[200] " + request.method + " to " + request.url);
 	convertPostData({
 			    'request': request,
+			    'json': true,
 			    'callback': function (data) {
+				var resp = {
+				    playerId: room.join(data.name, data.color)
+				};
 				response.writeHead(200, {'Content-Type': 'text/json'});
-				response.write(JSON.stringify(data));
+				response.write(JSON.stringify(resp));
 				response.end('\n');
-			    },
-			    'json': true
+			    }
 			});
     }
 }

@@ -33,24 +33,35 @@ var initialize = function () {
     players = [];
     colors = ["RED", "BLUE", "GREEN", "BLACK", "YELLOW"];
 
-    players.add = function (new_player) {
+    players.add = function (name, color) {
+	console.log("Name = " + name + ", Color = " + color);
+	var next_id = players.next_id();
+	if (next_id === -1) {
+	    return -1;
+	}
+
 	for (var i = 0; i < players.length; i++) {
-	    if (players[i].get_color() == new_player.get_color()) {
-		return false;
+	    console.log("Checking color: " + color);
+	    if (players[i].get_color() === color) {
+		console.log("Color collision found, returning");
+		return -1;
 	    }
 	}
 
 	for (i = 0; i < players.length; i++) {
-	    if (players[i] == null) {
-		players[i] = new_player;
-
+	    if (players[i] === null) {
+		players[i] = player.Player(next_id, name, color);
 		colors.erase(new_player.get_color());
-
-		return true;
+		console.log("Added player: " + JSON.stringify(new_player));
+		console.log("Colors array now contains: " + JSON.stringify(colors));
+		break;
+	    }
+	    else {
+		console.log("Checking with player: " + JSON.stringify(players[i]));
 	    }
 	}
 
-	return false;
+	return next_id;
     };
 
     players.remove = function (id) {
@@ -69,12 +80,8 @@ var initialize = function () {
 
 // returns valid id if joining was successful, otherwise -1
 var join = function (name, color) {
-    var next_id = players.next_id();
-    if (next_id != -1) {
-	players.add(player.Player(next_id, name, color));
-    }
 
-    return next_id;
+    return players.add(name, color);
 };
 
 var leave = function (id) {
@@ -83,7 +90,7 @@ var leave = function (id) {
 
 var get_colors = function() {
     return colors;
-}
+};
 
 exports.join = join;
 exports.leave = leave;

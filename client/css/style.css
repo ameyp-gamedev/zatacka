@@ -1,3 +1,7 @@
 canvas {
     border: 1px solid black;
 }
+
+.text {
+    width: 100px;
+}
