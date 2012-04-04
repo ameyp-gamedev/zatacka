@@ -43,13 +43,14 @@ var initialize = function () {
 	}
 
 	for (var item in players) {
-	    if (item.hasOwnProperty('color') &&
-		item.color === color) {
+	    if (players[item].hasOwnProperty('get_color') &&
+		players[item].get_color() === color) {
 		return -1;
 	    }
 	}
 
 	players[next_id] = player.Player(next_id, name, color);
+	players.length += 1;
 	colors.erase(color);
 
 	return next_id;
