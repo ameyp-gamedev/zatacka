@@ -65,6 +65,13 @@ var initialize = function () {
     };
 
     players.next_id = function () {
+	for (var item in players) {
+	    if (players[item] === null &&
+		item.search(room_name) !== -1) {
+		return item;
+	    }
+	}
+
 	if (players.length < MAX_PLAYERS)
 	    return room_name + "_" + players.length;
 	else
