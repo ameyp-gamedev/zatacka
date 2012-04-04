@@ -30,7 +30,9 @@ Array.prototype.erase = function(name, property) {
 };
 
 var initialize = function () {
-    players = [];
+    players = {
+	length: 0
+    };
     colors = ["RED", "BLUE", "GREEN", "BLACK", "YELLOW"];
 
     players.add = function (name, color) {
@@ -40,26 +42,15 @@ var initialize = function () {
 	    return -1;
 	}
 
-	for (var i = 0; i < players.length; i++) {
-	    console.log("Checking color: " + color);
-	    if (players[i].get_color() === color) {
-		console.log("Color collision found, returning");
+	for (var item in players) {
+	    if (item.hasOwnProperty('color') &&
+		item.color === color) {
 		return -1;
 	    }
 	}
 
-	for (i = 0; i < players.length; i++) {
-	    if (players[i] === null) {
-		players[i] = player.Player(next_id, name, color);
-		colors.erase(new_player.get_color());
-		console.log("Added player: " + JSON.stringify(new_player));
-		console.log("Colors array now contains: " + JSON.stringify(colors));
-		break;
-	    }
-	    else {
-		console.log("Checking with player: " + JSON.stringify(players[i]));
-	    }
-	}
+	players[next_id] = player.Player(next_id, name, color);
+	colors.erase(color);
 
 	return next_id;
     };
