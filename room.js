@@ -1,6 +1,12 @@
 var player = require('./player.js');
+var bit_array = require('bit-array');
 var MAX_PLAYERS = 5;
 var room_name = "test01";
+
+var WIDTH = 800;
+var HEIGHT = 600;
+
+var pixelArray = new bit_array;
 
 var players;
 var colors;
@@ -130,14 +136,14 @@ var calculateCollisions = function (id, points) {
     // check for actual collisions next
     for (i = 0; i < points.length; i += 1) {
 	bitPos = getBitPosition(points[i]);
-	if (pixelArray.getAt(bitPos) == BitArray._ON) {
+	if (pixelArray.get(bitPos) === true) {
 	    if (players[id] !== null) {
 		players[id].kill();
 	    }
 	    console.log("Player " + id + " collided");
 	    break;
 	}
-	pixelArray.setAt(bitPos, 1);
+	pixelArray.set(bitPos, true);
 	deltas.push(bitPos);
     }
 
@@ -178,3 +184,7 @@ exports.join = join;
 exports.leave = leave;
 exports.initialize = initialize;
 exports.get_colors = get_colors;
+exports.calculateCollisions = calculateCollisions;
+exports.mapPlayerDeltas = mapPlayerDeltas;
+exports.getPlayerPositions = getPlayerPositions;
+exports.isPlayerAlive = isPlayerAlive;

@@ -84,7 +84,7 @@ function update(request, response) {
 				resp.alive = room.isPlayerAlive(data.playerId);
 				resp.coloredPositions = room.getPlayerPositions(data.playerId);
 				response.writeHead(200, {'Content-Type': 'text/json'});
-				response.write(JSON.stringify(respDeltas));
+				response.write(JSON.stringify(resp));
 				response.end('\n');
 			    }
 			});

@@ -6,10 +6,6 @@ var angularVelocity = 0.1;
 var deltaTime = 33; 		//milli-secs
 var colorUpdateTime = 1000;
 var temp = new Array(480000);
-var pixelArray = new BitArray(480000);
-
-var WIDTH = 800;
-var HEIGHT = 600;
 
 var playerId = -1;
 
@@ -95,7 +91,7 @@ var joinGame = function () {
 		     });
     request.name = $('#name').val();
     $.post('join',
-	   request,
+	   JSON.stringify(request),
 	   function(data) {
 	       // console.log("success, response = " + JSON.stringify(data));
 	       playerId = data['playerId'];
@@ -180,7 +176,7 @@ var calculateTransformDeltas = function () {
 	'points': unique_points
     };
 
-    $.post('getColors', request, applyTransformPositions, 'json');
+    $.post('update', JSON.stringify(request), applyTransformPositions, 'json');
 };
 
 var applyTransformPositions = function(response) {
