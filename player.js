@@ -15,9 +15,11 @@ function Player(id, name, color) {
 	push_deltas: function (delta_list, color) {
 	    var count = 0;
 	    deltas[color] = [];
-	    for (var delta in delta_list) {
-		deltas[color].push(delta);
-		count += 1;
+	    for (var index in delta_list) {
+		if (typeof(delta_list[index] == 'number')) {
+		    deltas[color].push(delta_list[index]);
+		    count += 1;
+		}
 	    }
 	    return count;
 	},

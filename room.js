@@ -169,15 +169,24 @@ var getPlayerPositions = function (id) {
     var coloredDeltas = (players[id] !== null
 			 ? players[id].pop_deltas()
 			 : []);
-    var positions = [];
+    var positions = {};
+    var deltas = [];
+    var color = "";
 
-    for (var color in coloredDeltas) {
-	var deltas = coloredDeltas[color];
-	positions[color] = [];
-	for (var delta in deltas) {
-	    positions[color].push(getVector(delta));
+    for (color in coloredDeltas) {
+	if (typeof(coloredDeltas[color] !== 'function')) {
+	    deltas = coloredDeltas[color];
+	    positions[color] = [];
+	    for (var index in deltas) {
+		if (typeof(deltas[index]) === 'number') {
+		    positions[color].push(getVector(deltas[index]));
+		}
+	    }
 	}
     }
+
+    console.log(JSON.stringify(coloredDeltas));
+    console.log(JSON.stringify(positions));
 
     return positions;
 };
