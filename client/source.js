@@ -44,6 +44,7 @@ var initializePlayers = function () {
 	left: false,
 	right: false,
 	alive: true,
+	color: "",
 	inputQueue : new Array()
     };
     console.log("Initialized player (" + me.location.x + "," + me.location.y + ") with rotation " + me.rotation);
@@ -85,6 +86,7 @@ var joinGame = function () {
     $('.color').each(function(index) {
 			 if ($(this).prop('checked') === true) {
 			     request.color = $(this).prop('value');
+			     me.color = request.color;
 			     return false;
 			 }
 			 return true;
@@ -186,6 +188,8 @@ var applyTransformPositions = function(response) {
     var nextPos = null;
     var coloredPositions = response.coloredPositions;
     me.alive = response.alive;
+
+    console.log("Received positions " + JSON.stringify(coloredPositions));
 
     var i = 0;
 
