@@ -176,6 +176,8 @@ var calculateTransformDeltas = function () {
 	'points': unique_points
     };
 
+    console.log("Sending " + JSON.stringify(request));
+
     $.post('update', JSON.stringify(request), applyTransformPositions, 'json');
 };
 

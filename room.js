@@ -122,6 +122,8 @@ var calculateCollisions = function (id, points) {
     var bitPos = 0;
     var deltas = [];
 
+    console.log("Calculating collisions for id: " + id + " with inputs " + JSON.stringify(points));
+
     // check for out-of-bounds first
     var finalPos = points[points.length - 1];
     if (finalPos.x < 0 ||
@@ -135,7 +137,7 @@ var calculateCollisions = function (id, points) {
 
     // check for actual collisions next
     for (i = 0; i < points.length; i += 1) {
-	bitPos = getBitPosition(points[i]);
+	bitPos = getBitPosition(points[i].x, points[i].y);
 	if (pixelArray.get(bitPos) === true) {
 	    if (players[id] !== null) {
 		players[id].kill();
