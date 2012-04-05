@@ -42,9 +42,9 @@ var initialize = function () {
 	    return -1;
 	}
 
-	for (var item in players) {
-	    if (players[item].hasOwnProperty('get_color') &&
-		players[item].get_color() === color) {
+	for (var index in players) {
+	    if (players[index].hasOwnProperty('get_color') &&
+		players[index].get_color() === color) {
 		return -1;
 	    }
 	}
@@ -65,10 +65,10 @@ var initialize = function () {
     };
 
     players.next_id = function () {
-	for (var item in players) {
-	    if (players[item] === null &&
-		item.search(room_name) !== -1) {
-		return item;
+	for (var index in players) {
+	    if (players[index] === null &&
+		index.search(room_name) !== -1) {
+		return index;
 	    }
 	}
 
@@ -81,7 +81,6 @@ var initialize = function () {
 
 // returns valid id if joining was successful, otherwise -1
 var join = function (name, color) {
-
     return players.add(name, color);
 };
 
@@ -91,6 +90,88 @@ var leave = function (id) {
 
 var get_colors = function() {
     return colors;
+};
+
+var isPlayerAlive = function (id) {
+    return (players[id] !== null
+	    ? players[id].is_alive()
+	    : false);
+};
+
+var getBitPosition = function (x, y) {
+    return (WIDTH*y + x);
+};
+
+var getVector = function(bit) {
+    var x = bit % WIDTH;
+    var y = bit / WIDTH;
+    return {
+	x: x,
+	y: y
+    };
+};
+
+var calculateCollisions = function (id, points) {
+    var i = 0;
+    var bitPos = 0;
+    var deltas = [];
+
+    // check for out-of-bounds first
+    var finalPos = points[points.length - 1];
+    if (finalPos.x < 0 ||
+	finalPos.x > WIDTH ||
+	finalPos.y < 0 ||
+	finalPos.y > HEIGHT) {
+	if (players[id] !== null) {
+	    players[id].kill();
+	}
+    }
+
+    // check for actual collisions next
+    for (i = 0; i < points.length; i += 1) {
+	bitPos = getBitPosition(points[i]);
+	if (pixelArray.getAt(bitPos) == BitArray._ON) {
+	    if (players[id] !== null) {
+		players[id].kill();
+	    }
+	    console.log("Player " + id + " collided");
+	    break;
+	}
+	pixelArray.setAt(bitPos, 1);
+	deltas.push(bitPos);
+    }
+
+    return deltas;
+};
+
+var mapPlayerDeltas = function (id, deltas) {
+    if (players[id] === null) {
+	return;
+    }
+
+    for (var index in players) {
+	if (players[index] !== null &&
+	    players[index].hasOwnProperty('get_id')) {
+	        players[index].push_deltas(deltas, players[id].get_color());
+	}
+    }
+};
+
+var getPlayerPositions = function (id) {
+    var coloredDeltas = (players[id] !== null
+			 ? players[id].pop_deltas()
+			 : []);
+    var positions = [];
+
+    for (var color in coloredDeltas) {
+	var deltas = coloredDeltas[color];
+	positions[color] = [];
+	for (var delta in deltas) {
+	    positions[color].push(getVector(delta));
+	}
+    }
+
+    return positions;
 };
 
 exports.join = join;

@@ -1,5 +1,7 @@
 function Player(id, name, color) {
-    var deltas = [];
+    var deltas = {};
+    var alive = true;
+
     return {
 	get_name: function () {
 	    return name;
@@ -10,18 +12,25 @@ function Player(id, name, color) {
 	get_id: function () {
 	    return id;
 	},
-	push_deltas: function (delta_list) {
+	push_deltas: function (delta_list, color) {
+	    var count = 0;
+	    deltas[color] = [];
 	    for (var delta in delta_list) {
-		deltas.push(delta);
+		deltas[color].push(delta);
+		count += 1;
 	    }
-	    return deltas.length;
+	    return count;
 	},
 	pop_deltas: function () {
-	    var res = [];
-	    while (deltas.length > 0) {
-		res.push(deltas.pop());
-	    }
+	    var res = deltas;
+	    deltas = {};
 	    return res;
+	},
+	kill: function () {
+	    alive = false;
+	},
+	is_alive: function () {
+	    return alive;
 	}
     };
 }

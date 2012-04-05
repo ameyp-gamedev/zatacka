@@ -73,7 +73,22 @@ function join(request, response) {
 }
 
 function update(request, response) {
-    console.log("Request handler 'update' was called.");
+    if (request.method === 'POST') {
+	convertPostData({
+			    'request': request,
+			    'json': true,
+			    'callback': function (data) {
+				var deltas = room.calculateCollisions(data.playerId, data.points);
+				var resp = {};
+				room.mapPlayerDeltas(data.playerId, deltas);
+				resp.alive = room.isPlayerAlive(data.playerId);
+				resp.coloredPositions = room.getPlayerPositions(data.playerId);
+				response.writeHead(200, {'Content-Type': 'text/json'});
+				response.write(JSON.stringify(respDeltas));
+				response.end('\n');
+			    }
+			});
+    };
 }
 
 function files(request, response) {

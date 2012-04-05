@@ -177,61 +177,40 @@ var calculateTransformDeltas = function () {
 
     request = {
 	'playerId': playerId,
-	'deltas': unique_points
+	'points': unique_points
     };
 
-    $.post('getColors', request, applyTransformDeltas, 'json');
+    $.post('getColors', request, applyTransformPositions, 'json');
 };
 
-var applyTransformDeltas = function(coloredDeltas) {
-    var deltas = [];
-    var bits = [];
+var applyTransformPositions = function(response) {
+    var positions = [];
+    var nextPos = null;
+    var coloredPositions = response.coloredPositions;
+    me.alive = response.alive;
+
     var i = 0;
 
-    for (var color in coloredDeltas) {
-	deltas = coloredDeltas[color];
+    for (var color in coloredPositions) {
+	positions = coloredPositions[color];
+	for (nextPos in positions) {
+	    context.beginPath();
+	    context.moveTo(me.location.x, me.location.y);
+	    context.lineTo(nextPos.x, nextPos.y);
+	    context.stroke();
 
-
-	for (i=0; i<bits.length; i++) {
-	    if (pixelArray.getAt(bits[i]) == BitArray._ON) {
-		collided = true;
-		console.log("collided");
-		console.log("pos=" + bits[i]);
-		break;
-	    }
-	    console.log("pos=" + bits[i]);
-	    pixelArray.setAt(bits[i], 1);
+	    /*
+	     context.closePath();
+	     console.log("Drawing line from (" + me.location.x + "," + me.location.y
+	     + ") to (" + nextPos.x + "," + nextPos.y + ")");
+	     */
 	}
 
-	context.beginPath();
-	context.moveTo(me.location.x, me.location.y);
-	context.lineTo(nextPos.x, nextPos.y);
-	context.stroke();
-
-	/*
-	 context.closePath();
-	 console.log("Drawing line from (" + me.location.x + "," + me.location.y
-	 + ") to (" + nextPos.x + "," + nextPos.y + ")");
-	 */
-
-	if (collided == false) {
+	if (me.color === color) {
 	    me.location.x = nextPos.x;
 	    me.location.y = nextPos.y;
 	}
-
-	if ( (me.location.x < 0) ||
-	    (me.location.y < 0) ||
-	     (me.location.x > WIDTH) ||
-	     (me.location.y > HEIGHT) ||
-	     (collided == true) ) {
- 	    me.alive = false;
-	}
     }
-};
-
-var getBitPosition = function (x, y) {
-//    console.log("(" + x + "," + y + ") => " + (WIDTH*y + x));
-    return (WIDTH*y + x);
 };
 
 var lerp = function (beg, end, step) {
