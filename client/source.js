@@ -11,6 +11,8 @@ var pixelArray = new BitArray(480000);
 var WIDTH = 800;
 var HEIGHT = 600;
 
+var playerId = -1;
+
 // to de removed
 var me;
 
@@ -34,6 +36,7 @@ var initializeContext = function () {
     }
 };
 
+// todo move to server
 var initializePlayers = function () {
     // TODO make this a local variable and add it to players array for multiplayer
     me = {
@@ -92,9 +95,11 @@ var joinGame = function () {
 		     });
     request.name = $('#name').val();
     $.post('join',
-	   JSON.stringify(request),
+	   request,
 	   function(data) {
-	       console.log("success, response = " + JSON.stringify(data));
+	       // console.log("success, response = " + JSON.stringify(data));
+	       playerId = data['playerId'];
+	       console.log("Received playerId: " + playerId);
 	   },
 	   'json');
 };
@@ -122,11 +127,11 @@ var onKeyUp = function (event) {
 var Tick = function () {
     // console.log("Tick");
     if (me.alive) {
-	transformPlayer();
+	calculateTransformDeltas();
     }
 };
 
-var transformPlayer = function () {
+var calculateTransformDeltas = function () {
     if ( (me.left == true) && (me.right == false) ) {
 	console.log("Turning left");
 	me.rotation -= angularVelocity;
@@ -144,21 +149,15 @@ var transformPlayer = function () {
 	x : me.location.x + Math.floor(Math.cos(me.rotation)*linearVelocity*deltaTime/1000),
 	y : me.location.y + Math.floor(Math.sin(me.rotation)*linearVelocity*deltaTime/1000)
     };
-    context.beginPath();
-    context.moveTo(me.location.x, me.location.y);
-    context.lineTo(nextPos.x, nextPos.y);
-    context.stroke();
-/*
-    context.closePath();
-    console.log("Drawing line from (" + me.location.x + "," + me.location.y
-		+ ") to (" + nextPos.x + "," + nextPos.y + ")");
-*/
 
     var deltaX = nextPos.x - me.location.x;
     var deltaY = nextPos.y - me.location.y;
     var len = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
 
-    var points = new Array();
+    var points = [], unique_points = [];
+    var request = {};
+
+    var i = 0, j = 0, prevPoint;
 
     for (i=1; i<len; i++) {
 	points.push({
@@ -167,43 +166,66 @@ var transformPlayer = function () {
 		     });
     }
 
-    var bits = new Array();
+    for (i = 0; i < points.length; i += 1) {
+	if (unique_points.length === 0 ||
+	    points[i].x !== prevPoint.x ||
+	    points[i].y !== prevPoint.y) {
+	        prevPoint = points[i];
+	        unique_points.push(points[i]);
+	}
+    }
 
-    skip:
-    for (i=0; i<points.length; i++) {
-	var position = getBitPosition(points[i].x, points[i].y);
-	for (j=0; j<bits.length; j++) {
-	    if (position == bits[j]) {
-		continue skip;
+    request = {
+	'playerId': playerId,
+	'deltas': unique_points
+    };
+
+    $.post('getColors', request, applyTransformDeltas, 'json');
+};
+
+var applyTransformDeltas = function(coloredDeltas) {
+    var deltas = [];
+    var bits = [];
+    var i = 0;
+
+    for (var color in coloredDeltas) {
+	deltas = coloredDeltas[color];
+
+
+	for (i=0; i<bits.length; i++) {
+	    if (pixelArray.getAt(bits[i]) == BitArray._ON) {
+		collided = true;
+		console.log("collided");
+		console.log("pos=" + bits[i]);
+		break;
 	    }
-	}
-
-	bits.push(position);
-    }
-
-    var collided = false;
-    for (i=0; i<bits.length; i++) {
-	if (pixelArray.getAt(bits[i]) == BitArray._ON) {
-	    collided = true;
-	    console.log("collided");
 	    console.log("pos=" + bits[i]);
-	    break;
+	    pixelArray.setAt(bits[i], 1);
 	}
-	console.log("pos=" + bits[i]);
-	pixelArray.setAt(bits[i], 1);
-    }
 
-    if (collided == false) {
-	me.location.x = nextPos.x;
-	me.location.y = nextPos.y;
-    }
+	context.beginPath();
+	context.moveTo(me.location.x, me.location.y);
+	context.lineTo(nextPos.x, nextPos.y);
+	context.stroke();
 
-    if ( (me.location.x < 0) ||
-	 (me.location.y < 0) ||
-	 (me.location.x > WIDTH) ||
-	 (me.location.y > HEIGHT) ||
-	 (collided == true) ) {
- 	me.alive = false;
+	/*
+	 context.closePath();
+	 console.log("Drawing line from (" + me.location.x + "," + me.location.y
+	 + ") to (" + nextPos.x + "," + nextPos.y + ")");
+	 */
+
+	if (collided == false) {
+	    me.location.x = nextPos.x;
+	    me.location.y = nextPos.y;
+	}
+
+	if ( (me.location.x < 0) ||
+	    (me.location.y < 0) ||
+	     (me.location.x > WIDTH) ||
+	     (me.location.y > HEIGHT) ||
+	     (collided == true) ) {
+ 	    me.alive = false;
+	}
     }
 };
 
