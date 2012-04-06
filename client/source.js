@@ -206,10 +206,7 @@ var applyTransformPositions = function(response) {
 	positions = coloredPositions[color];
 	for (i = 0; i < positions.length; i += 1) {
 	    nextPos = positions[i];
-	    context.beginPath();
-	    context.moveTo(me.location.x, me.location.y);
-	    context.lineTo(nextPos.x, nextPos.y);
-	    context.stroke();
+	    drawLine(me.location, nextPos, color);
 
 	    /*
 	     context.closePath();
@@ -229,4 +226,12 @@ var applyTransformPositions = function(response) {
     if (me.alive) {
 	setTimeout("sendTransformPositions();", 10);
     }
+};
+
+var drawLine = function (from, to, color) {
+    context.strokeStyle = color;
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.stroke();
 };

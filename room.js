@@ -39,7 +39,7 @@ var initialize = function () {
     players = {
 	length: 0
     };
-    colors = ["RED", "BLUE", "GREEN", "BLACK", "YELLOW"];
+    colors = ["red", "blue", "green", "black", "orange"];
 
     players.add = function (name, color) {
 	console.log("Name = " + name + ", Color = " + color);
@@ -168,7 +168,7 @@ var calculateCollisions = function (id, points) {
 	}
 
 	// check for actual collisions next
-	for (i = 0; i < points.length; i += 1) {
+	for (i = 0; i < points.length && players[id].is_alive(); i += 1) {
 	    bitPos = getBitPosition(points[i].x, points[i].y);
 	    if (pixelArray.get(bitPos) === true) {
 		if (players[id] !== null) {
