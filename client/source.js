@@ -157,23 +157,10 @@ var calculateTransformDeltas = function () {
 	// console.log("Going straight");
     }
 
-    var nextPos = {
+    me.points.push({
 	x : me.location.x + Math.floor(Math.cos(me.rotation)*linearVelocity*deltaTime/1000),
 	y : me.location.y + Math.floor(Math.sin(me.rotation)*linearVelocity*deltaTime/1000)
-    };
-
-    var deltaX = nextPos.x - me.location.x;
-    var deltaY = nextPos.y - me.location.y;
-    var len = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
-
-    var i = 0, j = 0;
-
-    for (i = 1; i < len; i += 1) {
-	me.points.push({
-	    x: lerp(me.location.x, nextPos.x, i/len),
-	    y: lerp(me.location.y, nextPos.y, i/len)
-	});
-    }
+    });
 };
 
 var sendTransformPositions = function() {
@@ -242,8 +229,4 @@ var applyTransformPositions = function(response) {
     if (me.alive) {
 	setTimeout("sendTransformPositions();", 10);
     }
-};
-
-var lerp = function (beg, end, step) {
-    return Math.floor(beg + step * (end - beg));
 };

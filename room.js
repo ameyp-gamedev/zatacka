@@ -117,6 +117,37 @@ var getVector = function(bit) {
     };
 };
 
+var lerp = function (beg, end, step) {
+    return Math.floor(beg + step * (end - beg));
+};
+
+var calculateInterpolations = function(points) {
+    var finerPoints = [];
+    var i = 0,
+	j = 0,
+	deltaX = 0,
+	deltaY = 0,
+	len = 0;
+
+    for (i = 0; i < points.length - 1; i += 1) {
+	if (i == 0) {
+	    finerPoints.push(points[i]);
+	}
+	else {
+	    deltaX = points[i+1].x - points[i].x;
+	    deltaY = points[i+1].y - points[i].y;
+	    len = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+
+	    for (j = 1; j < len; j += 1) {
+		finerPoints.push({
+		    x: lerp(points[i].x, points[i+1].x, i/len),
+		    y: lerp(points[i].y, points[i+1].y, i/len)
+		});
+	    }
+	}
+    }
+};
+
 var calculateCollisions = function (id, points) {
     var i = 0;
     var bitPos = 0;
@@ -186,9 +217,6 @@ var getPlayerPositions = function (id) {
 	    }
 	}
     }
-
-    console.log(JSON.stringify(coloredDeltas));
-    console.log(JSON.stringify(positions));
 
     return positions;
 };
