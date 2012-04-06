@@ -47,7 +47,8 @@ var initializePlayers = function () {
 	right: false,
 	alive: true,
 	color: "",
-	points: [],
+	outgoingPoints: [],
+	incomingPoints: [],
 	debug: []
     };
     console.log("Initialized player (" + me.location.x + "," + me.location.y + ") with rotation " + me.rotation);
@@ -142,6 +143,7 @@ var Tick = function () {
     // console.log("Tick");
     if (me.alive) {
 	calculateTransformDeltas();
+	renderCanvas();
     }
 };
 
@@ -158,11 +160,11 @@ var calculateTransformDeltas = function () {
 	// console.log("Going straight");
     }
 
-    me.points.push({
+    me.outgoingPoints.push({
 	x : me.location.x + Math.floor(Math.cos(me.rotation)*linearVelocity*deltaTime/1000),
 	y : me.location.y + Math.floor(Math.sin(me.rotation)*linearVelocity*deltaTime/1000)
     });
-    // console.log("Points contains: " + JSON.stringify(me.points));
+    // console.log("Points contains: " + JSON.stringify(me.outgoingPoints));
 };
 
 var sendTransformPositions = function() {
@@ -172,12 +174,12 @@ var sendTransformPositions = function() {
     var i = 0,
 	prevPoint;
 
-    for (i = 0; i < me.points.length; i += 1) {
+    for (i = 0; i < me.outgoingPoints.length; i += 1) {
 	if (unique_points.length === 0 ||
-	    me.points[i].x !== prevPoint.x ||
-	    me.points[i].y !== prevPoint.y) {
-	    prevPoint = me.points[i];
-	    unique_points.push(me.points[i]);
+	    me.outgoingPoints[i].x !== prevPoint.x ||
+	    me.outgoingPoints[i].y !== prevPoint.y) {
+	    prevPoint = me.outgoingPoints[i];
+	    unique_points.push(me.outgoingPoints[i]);
 	}
     }
 
@@ -185,7 +187,7 @@ var sendTransformPositions = function() {
 	'playerId': playerId,
 	'points': unique_points
     };
-    me.points = [];
+    me.outgoingPoints = [];
 
     if (unique_points.length > 0) {
 	me.debug.push(unique_points);
@@ -215,8 +217,10 @@ var applyTransformPositions = function(response) {
 	    me.debug.push(positions);
 	}
 
+	me.incomingPoints[color] = [];
 	for (i = 0; i < positions.length; i += 1) {
 	    nextPos = positions[i];
+	    me.incomingPoints[color].push(nextPos);
 	    drawLine(me.location, nextPos, color);
 
 	    /*
@@ -241,6 +245,22 @@ var applyTransformPositions = function(response) {
 	console.log(JSON.stringify(me.debug));
     }
 };
+
+var renderCanvas = function () {
+    var i = 0;
+    var currentPoint = null,
+	nextPoint = null;
+
+    for (var color in me.incomingPoints) {
+	for (i = 0; i < me.incomingPoints[color].length - 1; i += 1) {
+	    currentPoint = me.incomingPoints[color][i];
+	    nextPoint = me.incomingPoints[color][i+1];
+	    drawLine(currentPoint, nextPoint, color);
+	}
+
+	me.incomingPoints[color] = [];
+    }
+}
 
 var drawLine = function (from, to, color) {
     context.strokeStyle = color;
