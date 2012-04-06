@@ -105,12 +105,12 @@ var isPlayerAlive = function (id) {
 };
 
 var getBitPosition = function (x, y) {
-    return (WIDTH*y + x);
+    return Math.floor((WIDTH*y + x));
 };
 
 var getVector = function(bit) {
-    var x = bit % WIDTH;
-    var y = bit / WIDTH;
+    var x = Math.floor(bit % WIDTH);
+    var y = Math.floor(bit / WIDTH);
     return {
 	x: x,
 	y: y
@@ -124,29 +124,31 @@ var calculateCollisions = function (id, points) {
 
     console.log("Calculating collisions for id: " + id + " with inputs " + JSON.stringify(points));
 
-    // check for out-of-bounds first
-    var finalPos = points[points.length - 1];
-    if (finalPos.x < 0 ||
-	finalPos.x > WIDTH ||
-	finalPos.y < 0 ||
-	finalPos.y > HEIGHT) {
-	if (players[id] !== null) {
-	    players[id].kill();
-	}
-    }
-
-    // check for actual collisions next
-    for (i = 0; i < points.length; i += 1) {
-	bitPos = getBitPosition(points[i].x, points[i].y);
-	if (pixelArray.get(bitPos) === true) {
+    if (points.length !== 0) {
+	// check for out-of-bounds first
+	var finalPos = points[points.length - 1];
+	if (finalPos.x < 0 ||
+	    finalPos.x > WIDTH ||
+	    finalPos.y < 0 ||
+	    finalPos.y > HEIGHT) {
 	    if (players[id] !== null) {
 		players[id].kill();
 	    }
-	    console.log("Player " + id + " collided");
-	    break;
 	}
-	pixelArray.set(bitPos, true);
-	deltas.push(bitPos);
+
+	// check for actual collisions next
+	for (i = 0; i < points.length; i += 1) {
+	    bitPos = getBitPosition(points[i].x, points[i].y);
+	    if (pixelArray.get(bitPos) === true) {
+		if (players[id] !== null) {
+		    players[id].kill();
+		}
+		console.log("Player " + id + " collided");
+		break;
+	    }
+	    pixelArray.set(bitPos, true);
+	    deltas.push(bitPos);
+	}
     }
 
     return deltas;

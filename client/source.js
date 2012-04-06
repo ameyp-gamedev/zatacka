@@ -1,3 +1,5 @@
+/* global setInterval, clearInterval, setTimeout, console, JSON, $ */
+
 // The canvas context
 var context;
 var players = new Array();
@@ -45,61 +47,74 @@ var initializePlayers = function () {
 	right: false,
 	alive: true,
 	color: "",
-	inputQueue : new Array()
+	points: []
     };
     console.log("Initialized player (" + me.location.x + "," + me.location.y + ") with rotation " + me.rotation);
 };
 
 var updateColors = function () {
-    $.post('getColors',
-	  function (colors) {
-	      var html = '';
-	      var chosenColor = '';
-	      $('.color').each(function(index) {
-				   if ($(this).prop('checked') === true) {
-				       chosenColor = $(this).prop('value');
-				       return false; // breaks out of '.each'
-				   }
-				   return true;
-			       });
-	      for (var i = 0; i < colors.length; i += 1) {
-		  html += "<input type=\"radio\""
-		      + " name=\"color\""
-		      + " class=\"color\""
-		      + " value=\"" + colors[i] + "\""
-		      + (chosenColor === colors[i] ? " checked" : "")
-		      + " />" + colors[i] + "<br />";
-	      }
-	      $('#colors').html(html);
-	  });
+    var jqxhr = $.post('getColors',
+		       function (colors) {
+			   var html = '';
+			   var chosenColor = '';
+			   $('.color').each(function(index) {
+			       if ($(this).prop('checked') === true) {
+				   chosenColor = $(this).prop('value');
+				   return false; // breaks out of '.each'
+			       }
+			       return true;
+			   });
+			   for (var i = 0; i < colors.length; i += 1) {
+			       html += "<input type=\"radio\""
+				   + " name=\"color\""
+				   + " class=\"color\""
+				   + " value=\"" + colors[i] + "\""
+				   + (chosenColor === colors[i]
+				      ? " checked"
+				      : "")
+				   + " />" + colors[i] + "<br />";
+			   }
+			   $('#colors').html(html);
+		       });
+    jqxhr.fail(function () {
+	clearInterval(jqxhr);
+    });
 };
 
 // will be triggered from the server in multi
 var startGame = function () {
     // console.log("startGame");
     setInterval(Tick, deltaTime);
+    // post to server and get a blank response
+    applyTransformPositions({
+	alive: true,
+	coloredPositions: {}
+    });
 };
 
 var joinGame = function () {
     var request = {
     };
     $('.color').each(function(index) {
-			 if ($(this).prop('checked') === true) {
-			     request.color = $(this).prop('value');
-			     me.color = request.color;
-			     return false;
-			 }
-			 return true;
-		     });
+	if ($(this).prop('checked') === true) {
+	    request.color = $(this).prop('value');
+	    me.color = request.color;
+	    return false;
+	}
+	return true;
+    });
     request.name = $('#name').val();
-    $.post('join',
+    var jqxhr = $.post('join',
 	   JSON.stringify(request),
 	   function(data) {
 	       // console.log("success, response = " + JSON.stringify(data));
 	       playerId = data['playerId'];
 	       console.log("Received playerId: " + playerId);
 	   },
-	   'json');
+		       'json');
+    jqxhr.fail(function () {
+	console.log("Failed to join game");
+    });
 };
 
 var onKeyDown = function (event) {
@@ -131,16 +146,15 @@ var Tick = function () {
 
 var calculateTransformDeltas = function () {
     if ( (me.left == true) && (me.right == false) ) {
-	console.log("Turning left");
+	// console.log("Turning left");
 	me.rotation -= angularVelocity;
     }
     else if ( (me.left == false) && (me.right == true) ) {
-	console.log("Turning right");
+	// console.log("Turning right");
 	me.rotation += angularVelocity;
     }
     else {
-//	console.log("Going straight");
-	// going straight
+	// console.log("Going straight");
     }
 
     var nextPos = {
@@ -152,24 +166,29 @@ var calculateTransformDeltas = function () {
     var deltaY = nextPos.y - me.location.y;
     var len = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
 
-    var points = [], unique_points = [];
-    var request = {};
+    var i = 0, j = 0;
 
-    var i = 0, j = 0, prevPoint;
-
-    for (i=1; i<len; i++) {
-	points.push({
-			 x: lerp(me.location.x, nextPos.x, i/len),
-			 y: lerp(me.location.y, nextPos.y, i/len)
-		     });
+    for (i=2; i<len; i++) {
+	me.points.push({
+	    x: lerp(me.location.x, nextPos.x, i/len),
+	    y: lerp(me.location.y, nextPos.y, i/len)
+	});
     }
+};
 
-    for (i = 0; i < points.length; i += 1) {
+var sendTransformPositions = function() {
+    var request;
+    var unique_points = [];
+
+    var i = 0,
+	prevPoint;
+
+    for (i = 0; i < me.points.length; i += 1) {
 	if (unique_points.length === 0 ||
-	    points[i].x !== prevPoint.x ||
-	    points[i].y !== prevPoint.y) {
-	        prevPoint = points[i];
-	        unique_points.push(points[i]);
+	    me.points[i].x !== prevPoint.x ||
+	    me.points[i].y !== prevPoint.y) {
+	    prevPoint = me.points[i];
+	    unique_points.push(me.points[i]);
 	}
     }
 
@@ -177,25 +196,29 @@ var calculateTransformDeltas = function () {
 	'playerId': playerId,
 	'points': unique_points
     };
+    me.points = [];
 
-    console.log("Sending " + JSON.stringify(request));
-
-    $.post('update', JSON.stringify(request), applyTransformPositions, 'json');
+    // console.log("Sending positions: " + JSON.stringify(request));
+    var jqxhr = $.post('update', JSON.stringify(request), applyTransformPositions, 'json');
+    jqxhr.fail(function () {
+	console.log("Failed to update positions");
+	clearInterval(Tick);
+    });
 };
 
 var applyTransformPositions = function(response) {
     var positions = [];
     var nextPos = null;
     var coloredPositions = response.coloredPositions;
+    var i = 0;;
+
     me.alive = response.alive;
-
-    console.log("Received positions " + JSON.stringify(coloredPositions));
-
-    var i = 0;
+    // console.log("Received response: " + JSON.stringify(response));
 
     for (var color in coloredPositions) {
 	positions = coloredPositions[color];
-	for (nextPos in positions) {
+	for (i = 0; i < positions.length; i += 1) {
+	    nextPos = positions[i];
 	    context.beginPath();
 	    context.moveTo(me.location.x, me.location.y);
 	    context.lineTo(nextPos.x, nextPos.y);
@@ -208,10 +231,16 @@ var applyTransformPositions = function(response) {
 	     */
 	}
 
-	if (me.color === color) {
+	if (nextPos !== null &&
+	    me.color === color) {
+	    console.log("Updating my location from: " + JSON.stringify(me.location) + " to: " + JSON.stringify(nextPos) + " for response: " + JSON.stringify(response));
 	    me.location.x = nextPos.x;
 	    me.location.y = nextPos.y;
 	}
+    }
+
+    if (me.alive) {
+	setTimeout("sendTransformPositions();", 10);
     }
 };
 
