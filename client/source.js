@@ -48,7 +48,13 @@ var initializePlayers = function () {
 	alive: true,
 	color: "",
 	outgoingPoints: [],
-	incomingPoints: [],
+	incomingPoints: {
+	    'black': [],
+	    'blue': [],
+	    'green': [],
+	    'red': [],
+	    'orange': []
+	},
 	debug: []
     };
     console.log("Initialized player (" + me.location.x + "," + me.location.y + ") with rotation " + me.rotation);
@@ -71,7 +77,7 @@ var updateColors = function () {
 				   + " name=\"color\""
 				   + " class=\"color\""
 				   + " value=\"" + colors[i] + "\""
-				   + (chosenColor === colors[i]
+				   + (chosenColor === colors[i] || chosenColor === ''
 				      ? " checked"
 				      : "")
 				   + " />" + colors[i] + "<br />";
@@ -148,6 +154,8 @@ var Tick = function () {
 };
 
 var calculateTransformDeltas = function () {
+    var nextPos = {};
+
     if ( (me.left == true) && (me.right == false) ) {
 	// console.log("Turning left");
 	me.rotation -= angularVelocity;
@@ -160,10 +168,14 @@ var calculateTransformDeltas = function () {
 	// console.log("Going straight");
     }
 
-    me.outgoingPoints.push({
+    nextPos = {
 	x : me.location.x + Math.floor(Math.cos(me.rotation)*linearVelocity*deltaTime/1000),
 	y : me.location.y + Math.floor(Math.sin(me.rotation)*linearVelocity*deltaTime/1000)
-    });
+    };
+
+    me.outgoingPoints.push(nextPos);
+    me.location.x = nextPos.x;
+    me.location.y = nextPos.y;
     // console.log("Points contains: " + JSON.stringify(me.outgoingPoints));
 };
 
@@ -203,7 +215,6 @@ var sendTransformPositions = function() {
 
 var applyTransformPositions = function(response) {
     var positions = [];
-    var nextPos = null;
     var coloredPositions = response.coloredPositions;
     var i = 0;;
 
@@ -217,24 +228,8 @@ var applyTransformPositions = function(response) {
 	    me.debug.push(positions);
 	}
 
-	me.incomingPoints[color] = [];
 	for (i = 0; i < positions.length; i += 1) {
-	    nextPos = positions[i];
-	    me.incomingPoints[color].push(nextPos);
-	    drawLine(me.location, nextPos, color);
-
-	    /*
-	     context.closePath();
-	     console.log("Drawing line from (" + me.location.x + "," + me.location.y
-	     + ") to (" + nextPos.x + "," + nextPos.y + ")");
-	     */
-	}
-
-	if (nextPos !== null &&
-	    me.color === color) {
-	    console.log("Updating my location from: " + JSON.stringify(me.location) + " to: " + JSON.stringify(nextPos) + " for response: " + JSON.stringify(response));
-	    me.location.x = nextPos.x;
-	    me.location.y = nextPos.y;
+	    me.incomingPoints[color].push(positions[i]);
 	}
     }
 
@@ -260,9 +255,10 @@ var renderCanvas = function () {
 
 	me.incomingPoints[color] = [];
     }
-}
+};
 
 var drawLine = function (from, to, color) {
+    // console.log("Drawing line from [" + from.x + "," + from.y + "] to [" + to.x + "," + to.y + "]");
     context.strokeStyle = color;
     context.beginPath();
     context.moveTo(from.x, from.y);

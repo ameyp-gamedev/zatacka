@@ -218,6 +218,14 @@ var calculateCollisions = function (id, points) {
     var i = 0;
     var bitPos = 0;
     var deltas = [];
+
+    // connect the dots
+    if (players[id].last_position.x > 0 &&
+	players[id].last_position.y > 0) {
+	bitPos = getBitPosition(players[id].last_position.x, players[id].last_position.y);
+	deltas.push(bitPos);
+    }
+
     var finerPoints = calculateInterpolations(id, points);
 
     if (points.length > 0) {
@@ -239,6 +247,7 @@ var calculateCollisions = function (id, points) {
 		players[id].kill();
 	    }
 	}
+
 
 	// check for actual collisions next
 	for (i = 0; i < finerPoints.length && players[id].is_alive(); i += 1) {
