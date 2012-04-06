@@ -47,7 +47,8 @@ var initializePlayers = function () {
 	right: false,
 	alive: true,
 	color: "",
-	points: []
+	points: [],
+	debug: []
     };
     console.log("Initialized player (" + me.location.x + "," + me.location.y + ") with rotation " + me.rotation);
 };
@@ -161,6 +162,7 @@ var calculateTransformDeltas = function () {
 	x : me.location.x + Math.floor(Math.cos(me.rotation)*linearVelocity*deltaTime/1000),
 	y : me.location.y + Math.floor(Math.sin(me.rotation)*linearVelocity*deltaTime/1000)
     });
+    // console.log("Points contains: " + JSON.stringify(me.points));
 };
 
 var sendTransformPositions = function() {
@@ -185,7 +187,11 @@ var sendTransformPositions = function() {
     };
     me.points = [];
 
+    if (unique_points.length > 0) {
+	me.debug.push(unique_points);
+    }
     // console.log("Sending positions: " + JSON.stringify(request));
+
     var jqxhr = $.post('update', JSON.stringify(request), applyTransformPositions, 'json');
     jqxhr.fail(function () {
 	console.log("Failed to update positions");
@@ -200,10 +206,15 @@ var applyTransformPositions = function(response) {
     var i = 0;;
 
     me.alive = response.alive;
+
     // console.log("Received response: " + JSON.stringify(response));
 
     for (var color in coloredPositions) {
 	positions = coloredPositions[color];
+	if (positions.length > 0) {
+	    me.debug.push(positions);
+	}
+
 	for (i = 0; i < positions.length; i += 1) {
 	    nextPos = positions[i];
 	    drawLine(me.location, nextPos, color);
@@ -225,6 +236,9 @@ var applyTransformPositions = function(response) {
 
     if (me.alive) {
 	setTimeout("sendTransformPositions();", 10);
+    }
+    else {
+	console.log(JSON.stringify(me.debug));
     }
 };
 

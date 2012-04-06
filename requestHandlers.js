@@ -85,7 +85,7 @@ function update(request, response) {
 				resp.coloredPositions = room.getPlayerPositions(data.playerId);
 				response.writeHead(200, {'Content-Type': 'text/json'});
 				response.write(JSON.stringify(resp));
-				console.log("Returning response: " + JSON.stringify(resp));
+				// console.log("Returning response: " + JSON.stringify(resp));
 				response.end('\n');
 			    }
 			});

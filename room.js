@@ -117,47 +117,120 @@ var getVector = function(bit) {
     };
 };
 
+var removeDuplicates = function(points) {
+    var unique_points = [];
+    var prevPoint,
+	i = 0;
+
+    for (i = 0; i < points.length; i += 1) {
+	if (unique_points.length === 0 ||
+	    points[i].x !== prevPoint.x ||
+	    points[i].y !== prevPoint.y) {
+	    prevPoint = points[i];
+	    unique_points.push(points[i]);
+	}
+    }
+
+    return unique_points;
+};
+
 var lerp = function (beg, end, step) {
     return Math.floor(beg + step * (end - beg));
 };
 
-var calculateInterpolations = function(points) {
-    var finerPoints = [];
+var calculateInterpolations = function(id, points) {
+    var finerPoints = [],
+	lerpPoints = [];
+    var lerpFrom = {},
+	lerpTo = {},
+	shouldLerp = true;
+
     var i = 0,
 	j = 0,
 	deltaX = 0,
 	deltaY = 0,
-	len = 0;
+	len = 0,
+	newPos = {};
 
-    for (i = 0; i < points.length - 1; i += 1) {
-	if (i == 0) {
-	    finerPoints.push(points[i]);
+    // console.log("Calculating interpolations for " + JSON.stringify(points));
+
+    if (players[id] === null) {
+	return [];
+    }
+
+    for (i = 0; i < points.length; i += 1) {
+	if (i === 0) {
+	    if (players[id].last_position.x === -1 &&
+		players[id].last_position.y === -1) {
+		lerpPoints.push(points[i]);
+		shouldLerp = false;
+	    }
+	    else {
+		lerpFrom = players[id].last_position;
+		lerpTo = points[i];
+		shouldLerp = true;
+	    }
 	}
 	else {
-	    deltaX = points[i+1].x - points[i].x;
-	    deltaY = points[i+1].y - points[i].y;
-	    len = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+	    lerpFrom = points[i-1];
+	    lerpTo = points[i];
+	    shouldLerp = true;
+	}
 
-	    for (j = 1; j < len; j += 1) {
-		finerPoints.push({
-		    x: lerp(points[i].x, points[i+1].x, i/len),
-		    y: lerp(points[i].y, points[i+1].y, i/len)
-		});
+	if (shouldLerp) {
+	    deltaX = lerpTo.x - lerpFrom.x;
+	    deltaY = lerpTo.y - lerpFrom.y;
+	    len = Math.floor(Math.sqrt(deltaX*deltaX + deltaY*deltaY));
+
+	    for (j = 0; j < len+1; j += 1) {
+		newPos = {
+		    x: lerp(lerpFrom.x, lerpTo.x, j/len),
+		    y: lerp(lerpFrom.y, lerpTo.y, j/len)
+		};
+		if (newPos.x !== players[id].last_position.x ||
+		    newPos.y !== players[id].last_position.y) {
+		    lerpPoints.push(newPos);
+		}
+		else {
+		    // console.log("Skipping interp: " + JSON.stringify(newPos));
+		}
 	    }
 	}
     }
+
+    if (points.length > 0) {
+	players[id].last_position.x = points[points.length - 1].x;
+	players[id].last_position.y = points[points.length - 1].y;
+	// console.log("last_position is now: " + JSON.stringify(players[id].last_position));
+    }
+
+    // remove duplicates
+    finerPoints = removeDuplicates(lerpPoints);
+
+    if (finerPoints.length < points.length) {
+	players[id].kill();
+	console.log("player = " + players[id].to_string);
+    }
+    return finerPoints;
 };
 
 var calculateCollisions = function (id, points) {
     var i = 0;
     var bitPos = 0;
     var deltas = [];
+    var finerPoints = calculateInterpolations(id, points);
 
-    console.log("Calculating collisions for id: " + id + " with inputs " + JSON.stringify(points));
+    if (points.length > 0) {
+	players[id].add_points(points);
+    }
+    if (finerPoints.length > 0) {
+	players[id].add_lerps(finerPoints);
+    }
+    // console.log("Calculating collisions for id: " + id + " with inputs " + JSON.stringify(finerPoints));
 
-    if (points.length !== 0) {
+    if (finerPoints.length !== 0) {
 	// check for out-of-bounds first
-	var finalPos = points[points.length - 1];
+	var finalPos = finerPoints[finerPoints.length - 1];
 	if (finalPos.x < 0 ||
 	    finalPos.x > WIDTH ||
 	    finalPos.y < 0 ||
@@ -168,13 +241,14 @@ var calculateCollisions = function (id, points) {
 	}
 
 	// check for actual collisions next
-	for (i = 0; i < points.length && players[id].is_alive(); i += 1) {
-	    bitPos = getBitPosition(points[i].x, points[i].y);
+	for (i = 0; i < finerPoints.length && players[id].is_alive(); i += 1) {
+	    bitPos = getBitPosition(finerPoints[i].x, finerPoints[i].y);
 	    if (pixelArray.get(bitPos) === true) {
 		if (players[id] !== null) {
 		    players[id].kill();
 		}
-		console.log("Player " + id + " collided");
+		console.log("Player: " + players[id].to_string());
+		console.log("Collided at point: " + JSON.stringify(finerPoints[i]));
 		break;
 	    }
 	    pixelArray.set(bitPos, true);
