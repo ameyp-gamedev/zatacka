@@ -168,7 +168,7 @@ var calculateTransformDeltas = function () {
 
     var i = 0, j = 0;
 
-    for (i=1; i<len; i++) {
+    for (i = 1; i < len; i += 1) {
 	me.points.push({
 	    x: lerp(me.location.x, nextPos.x, i/len),
 	    y: lerp(me.location.y, nextPos.y, i/len)
