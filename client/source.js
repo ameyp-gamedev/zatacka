@@ -209,9 +209,7 @@ var sendMyPosition = function() {
 
 var applyTransformPositions = function(response) {
     var coloredPositions = response.coloredPositions;
-    var newPosition = {};
-    var i = 0,
-	j = 0;
+    var i = 0;
 
     me.alive = response.alive;
 
@@ -219,16 +217,13 @@ var applyTransformPositions = function(response) {
 
     for (i = 0; i < coloredPositions.length; i += 1) {
 	if (coloredPositions[i].hasOwnProperty('color')) {
-
-	    newPosition = {
+	    me.incomingPoints.push({
 		color: coloredPositions[i].color,
 		position: {
 		    x: coloredPositions[i].position.x,
 		    y: coloredPositions[i].position.y
 		}
-	    };
-
-	    me.incomingPoints.push(newPosition);
+	    });
 	}
     }
 
