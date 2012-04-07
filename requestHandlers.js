@@ -62,9 +62,11 @@ function join(request, response) {
 			    'json': true,
 			    'callback': function (data) {
 				var resp = {
-				    playerId: room.join(data.name, data.color)
+				    id: room.join(data.name, data.color),
+				    origins: room.getPlayerOrigins()
 				};
 				response.writeHead(200, {'Content-Type': 'text/json'});
+				console.log("Initialized room with: " + JSON.stringify(resp));
 				response.write(JSON.stringify(resp));
 				response.end('\n');
 			    }
@@ -78,14 +80,17 @@ function update(request, response) {
 			    'request': request,
 			    'json': true,
 			    'callback': function (data) {
-				var deltas = room.calculateCollisions(data.playerId, data.points);
 				var resp = {};
-				room.mapPlayerDeltas(data.playerId, deltas);
-				resp.alive = room.isPlayerAlive(data.playerId);
-				resp.coloredPositions = room.getPlayerPositions(data.playerId);
+				//console.log("Received request: " + JSON.stringify(data));
+
+				room.updatePlayerPosition(data.id, data.position);
+				resp.coloredPositions = room.getPlayerPositions();
+				resp.alive = room.isPlayerAlive(data.id);
+
 				response.writeHead(200, {'Content-Type': 'text/json'});
 				response.write(JSON.stringify(resp));
-				console.log("Returning response: " + JSON.stringify(resp));
+
+				// console.log("Returning response: " + JSON.stringify(resp));
 				response.end('\n');
 			    }
 			});

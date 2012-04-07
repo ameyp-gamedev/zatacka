@@ -9,14 +9,14 @@ var deltaTime = 33; 		//milli-secs
 var colorUpdateTime = 1000;
 var temp = new Array(480000);
 
-var playerId = -1;
+var last_positions = {};
 
 // to de removed
 var me;
 
 var init = function () {
     initializeContext();
-    initializePlayers();
+    initializeMe();
     updateColors();
     setInterval(updateColors, colorUpdateTime);
 };
@@ -35,29 +35,39 @@ var initializeContext = function () {
 };
 
 // todo move to server
-var initializePlayers = function () {
+var initializeMe = function () {
     // TODO make this a local variable and add it to players array for multiplayer
     me = {
-	location : {
-	    x: Math.floor(Math.random()*700),
-	    y: Math.floor(Math.random()*500)
+	id: -1,
+	position: {
 	},
 	rotation : Math.PI*Math.random(),
 	left: false,
 	right: false,
 	alive: true,
 	color: "",
-	outgoingPoints: [],
-	incomingPoints: {
-	    'black': [],
-	    'blue': [],
-	    'green': [],
-	    'red': [],
-	    'orange': []
-	},
+	incomingPoints: [
+	],
 	debug: []
     };
-    console.log("Initialized player (" + me.location.x + "," + me.location.y + ") with rotation " + me.rotation);
+    console.log("Initialized player (" + me.position.x + "," + me.position.y + ") with rotation " + me.rotation);
+};
+
+var initializePlayers = function(origins) {
+    for (var i = 0; i < origins.length; i += 1) {
+	last_positions[origins[i].color] = {
+	    x: origins[i].position.x,
+	    y: origins[i].position.y
+	};
+	if (me.color === origins[i].color) {
+	    me.position = {
+		x: origins[i].position.x,
+		y: origins[i].position.y
+	    };
+	}
+    }
+
+    console.log("Initialized origins: " + JSON.stringify(last_positions));
 };
 
 var updateColors = function () {
@@ -85,7 +95,7 @@ var updateColors = function () {
 			   $('#colors').html(html);
 		       });
     jqxhr.fail(function () {
-	clearInterval(jqxhr);
+	clearInterval(updateColors);
     });
 };
 
@@ -94,10 +104,6 @@ var startGame = function () {
     // console.log("startGame");
     setInterval(Tick, deltaTime);
     // post to server and get a blank response
-    applyTransformPositions({
-	alive: true,
-	coloredPositions: {}
-    });
 };
 
 var joinGame = function () {
@@ -115,9 +121,10 @@ var joinGame = function () {
     var jqxhr = $.post('join',
 	   JSON.stringify(request),
 	   function(data) {
-	       // console.log("success, response = " + JSON.stringify(data));
-	       playerId = data['playerId'];
-	       console.log("Received playerId: " + playerId);
+	       console.log("success, response = " + JSON.stringify(data));
+	       me.id = data.id;
+	       initializePlayers(data.origins);
+	       console.log("Received id: " + me.id);
 	   },
 		       'json');
     jqxhr.fail(function () {
@@ -147,7 +154,7 @@ var onKeyUp = function (event) {
 
 var Tick = function () {
     // console.log("Tick");
-    if (me.alive) {
+    if (me.alive === true) {
 	calculateTransformDeltas();
 	renderCanvas();
     }
@@ -169,41 +176,28 @@ var calculateTransformDeltas = function () {
     }
 
     nextPos = {
-	x : me.location.x + Math.floor(Math.cos(me.rotation)*linearVelocity*deltaTime/1000),
-	y : me.location.y + Math.floor(Math.sin(me.rotation)*linearVelocity*deltaTime/1000)
+	x : me.position.x + Math.cos(me.rotation)*linearVelocity*deltaTime/1000,
+	y : me.position.y + Math.sin(me.rotation)*linearVelocity*deltaTime/1000
     };
 
-    me.outgoingPoints.push(nextPos);
-    me.location.x = nextPos.x;
-    me.location.y = nextPos.y;
+    sendMyPosition();
+    me.position.x = nextPos.x;
+    me.position.y = nextPos.y;
     // console.log("Points contains: " + JSON.stringify(me.outgoingPoints));
 };
 
-var sendTransformPositions = function() {
+var sendMyPosition = function() {
     var request;
-    var unique_points = [];
 
     var i = 0,
 	prevPoint;
 
-    for (i = 0; i < me.outgoingPoints.length; i += 1) {
-	if (unique_points.length === 0 ||
-	    me.outgoingPoints[i].x !== prevPoint.x ||
-	    me.outgoingPoints[i].y !== prevPoint.y) {
-	    prevPoint = me.outgoingPoints[i];
-	    unique_points.push(me.outgoingPoints[i]);
-	}
-    }
-
     request = {
-	'playerId': playerId,
-	'points': unique_points
+	'id': me.id,
+	'position': me.position
     };
-    me.outgoingPoints = [];
 
-    if (unique_points.length > 0) {
-	me.debug.push(unique_points);
-    }
+    me.debug.push(me.position);
     // console.log("Sending positions: " + JSON.stringify(request));
 
     var jqxhr = $.post('update', JSON.stringify(request), applyTransformPositions, 'json');
@@ -214,47 +208,50 @@ var sendTransformPositions = function() {
 };
 
 var applyTransformPositions = function(response) {
-    var positions = [];
     var coloredPositions = response.coloredPositions;
-    var i = 0;;
+    var newPosition = {};
+    var i = 0,
+	j = 0;
 
     me.alive = response.alive;
 
-    // console.log("Received response: " + JSON.stringify(response));
+    console.log("Received response: " + JSON.stringify(response));
 
-    for (var color in coloredPositions) {
-	positions = coloredPositions[color];
-	if (positions.length > 0) {
-	    me.debug.push(positions);
-	}
+    for (i = 0; i < coloredPositions.length; i += 1) {
+	if (coloredPositions[i].hasOwnProperty('color')) {
 
-	for (i = 0; i < positions.length; i += 1) {
-	    me.incomingPoints[color].push(positions[i]);
+	    newPosition = {
+		color: coloredPositions[i].color,
+		position: {
+		    x: coloredPositions[i].position.x,
+		    y: coloredPositions[i].position.y
+		}
+	    };
+
+	    me.incomingPoints.push(newPosition);
 	}
     }
 
-    if (me.alive) {
-	setTimeout("sendTransformPositions();", 10);
-    }
-    else {
+    if (me.alive === false) {
 	console.log(JSON.stringify(me.debug));
     }
 };
 
 var renderCanvas = function () {
     var i = 0;
+    var color;
     var currentPoint = null,
 	nextPoint = null;
 
-    for (var color in me.incomingPoints) {
-	for (i = 0; i < me.incomingPoints[color].length - 1; i += 1) {
-	    currentPoint = me.incomingPoints[color][i];
-	    nextPoint = me.incomingPoints[color][i+1];
-	    drawLine(currentPoint, nextPoint, color);
-	}
-
-	me.incomingPoints[color] = [];
+    for (i = 0; i < me.incomingPoints.length; i += 1) {
+	color = me.incomingPoints[i].color;
+	currentPoint = last_positions[color];
+	nextPoint = me.incomingPoints[i].position;
+	drawLine(currentPoint, nextPoint, color);
+	last_positions[me.incomingPoints[i].color] = me.incomingPoints[i].position;
     }
+
+    me.incomingPoints = [];
 };
 
 var drawLine = function (from, to, color) {
