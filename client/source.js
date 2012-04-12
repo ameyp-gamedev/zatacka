@@ -1,4 +1,4 @@
-/* global setInterval, clearInterval, setTimeout, console, JSON, $ */
+/* global setInterval, clearInterval, setTimeout, console, JSON, $, discretize */
 
 // The canvas context
 var context;
@@ -242,7 +242,7 @@ var renderCanvas = function () {
 	color = me.incomingPoints[i].color;
 	currentPoint = last_positions[color];
 	nextPoint = me.incomingPoints[i].position;
-	drawLine(currentPoint, nextPoint, color);
+	drawLine(discretize(currentPoint), discretize(nextPoint), color);
 	last_positions[me.incomingPoints[i].color] = me.incomingPoints[i].position;
     }
 

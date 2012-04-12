@@ -1,4 +1,5 @@
 var player = require('./player.js');
+var util = require('./client/util.js');
 var bit_array = require('bit-array');
 var MAX_PLAYERS = 5;
 var room_name = "test01";
@@ -113,40 +114,6 @@ var isPlayerAlive = function (id) {
     return (players[id] !== null
 	    ? players[id].is_alive()
 	    : false);
-};
-
-var getBitPosition = function (x, y) {
-    return Math.floor((WIDTH*y + x));
-};
-
-var getVector = function(bit) {
-    var x = Math.floor(bit % WIDTH);
-    var y = Math.floor(bit / WIDTH);
-    return {
-	x: x,
-	y: y
-    };
-};
-
-var removeDuplicates = function(points) {
-    var unique_points = [];
-    var prevPoint,
-	i = 0;
-
-    for (i = 0; i < points.length; i += 1) {
-	if (unique_points.length === 0 ||
-	    points[i].x !== prevPoint.x ||
-	    points[i].y !== prevPoint.y) {
-	    prevPoint = points[i];
-	    unique_points.push(points[i]);
-	}
-    }
-
-    return unique_points;
-};
-
-var lerp = function (beg, end, step) {
-    return Math.floor(beg + step * (end - beg));
 };
 
 var updatePlayerPosition = function(id, position) {
