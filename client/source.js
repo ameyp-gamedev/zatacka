@@ -196,6 +196,14 @@ var drawAndCollide = function(from, to) {
 	collisionBox,
 	i;
 
+    if (from.x < 0 ||
+	from.x > context.canvas.width ||
+	from.y < 0 ||
+	from.y > context.canvas.height) {
+	me.alive = false;
+	return;
+    }
+
     if (from.x > to.x) {
 	deltaX = from.x - to.x;
 	origin.x = from.x;
