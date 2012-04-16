@@ -84,8 +84,8 @@ function update(request, response) {
 				//console.log("Received request: " + JSON.stringify(data));
 
 				room.updatePlayerPosition(data.id, data.position);
-				resp.coloredPositions = room.getPlayerPositions();
-				resp.alive = room.isPlayerAlive(data.id);
+				resp.coloredPositions = room.getPlayerPositions(data.id);
+
 
 				response.writeHead(200, {'Content-Type': 'text/json'});
 				response.write(JSON.stringify(resp));

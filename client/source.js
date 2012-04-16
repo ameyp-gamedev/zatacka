@@ -7,7 +7,6 @@ var linearVelocity = 100.0;
 var angularVelocity = 0.1;
 var deltaTime = 33; 		//milli-secs
 var colorUpdateTime = 1000;
-var temp = new Array(480000);
 
 var last_positions = {};
 
@@ -26,6 +25,7 @@ var initializeContext = function () {
     if (canvas.getContext('2d')) {
 	console.log("Initialized the canvas context");
 	context = canvas.getContext('2d');
+	context.lineWidth = 2;
     }
     else {
 	var box = document.getElementById('canvas');
@@ -155,12 +155,15 @@ var onKeyUp = function (event) {
 var Tick = function () {
     // console.log("Tick");
     if (me.alive === true) {
-	calculateTransformDeltas();
+	updatePosition();
 	renderCanvas();
+    }
+    else {
+	clearInterval(Tick);
     }
 };
 
-var calculateTransformDeltas = function () {
+var updatePosition = function () {
     var nextPos = {};
 
     if ( (me.left == true) && (me.right == false) ) {
@@ -180,13 +183,49 @@ var calculateTransformDeltas = function () {
 	y : me.position.y + Math.sin(me.rotation)*linearVelocity*deltaTime/1000
     };
 
-    sendMyPosition();
+    drawAndCollide(me.position, nextPos);
+    sendPosition();
     me.position.x = nextPos.x;
     me.position.y = nextPos.y;
-    // console.log("Points contains: " + JSON.stringify(me.outgoingPoints));
 };
 
-var sendMyPosition = function() {
+var drawAndCollide = function(from, to) {
+    var deltaX = 0,
+	deltaY = 0,
+	origin = {},
+	collisionBox,
+	i;
+
+    if (from.x > to.x) {
+	deltaX = from.x - to.x;
+	origin.x = from.x;
+    }
+    else {
+	deltaX = to.x - from.x;
+	origin.x = from.x - 2;
+    }
+    if (from.y > to.y) {
+	deltaY = from.y - to.y;
+	origin.y = from.y;
+    }
+    else {
+	deltaY = to.y - from.y;
+	origin.y = from.y - 2;
+    }
+
+    collisionBox = context.getImageData(origin.x, origin.y, deltaX, deltaY).data;
+
+    for (i = 0; i < collisionBox.length; i += 1) {
+	if (collisionBox[i] !== 0) {
+	    me.alive = false;
+	    break;
+	}
+    }
+
+    // console.log("Checking for collision from [" + from.x + "," + from.y + "] to [" + to.x + "," + to.y + "] in " + JSON.stringify(collisionBox.data));
+};
+
+var sendPosition = function() {
     var request;
 
     var i = 0,
@@ -198,23 +237,22 @@ var sendMyPosition = function() {
     };
 
     me.debug.push(me.position);
-    // console.log("Sending positions: " + JSON.stringify(request));
+    // console.log("Sending position: " + JSON.stringify(request));
 
-    var jqxhr = $.post('update', JSON.stringify(request), applyTransformPositions, 'json');
+    var jqxhr = $.post('update', JSON.stringify(request), drawOthers, 'json');
     jqxhr.fail(function () {
 	console.log("Failed to update positions");
 	clearInterval(Tick);
     });
 };
 
-var applyTransformPositions = function(response) {
+var drawOthers = function(response) {
     var coloredPositions = response.coloredPositions;
     var i = 0;
 
-    me.alive = response.alive;
-
     console.log("Received response: " + JSON.stringify(response));
 
+    // Add to queue for drawing
     for (i = 0; i < coloredPositions.length; i += 1) {
 	if (coloredPositions[i].hasOwnProperty('color')) {
 	    me.incomingPoints.push({
@@ -242,7 +280,7 @@ var renderCanvas = function () {
 	color = me.incomingPoints[i].color;
 	currentPoint = last_positions[color];
 	nextPoint = me.incomingPoints[i].position;
-	drawLine(discretize(currentPoint), discretize(nextPoint), color);
+	drawLine(currentPoint, nextPoint, color);
 	last_positions[me.incomingPoints[i].color] = me.incomingPoints[i].position;
     }
 

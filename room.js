@@ -110,19 +110,13 @@ var get_colors = function() {
     return colors;
 };
 
-var isPlayerAlive = function (id) {
-    return (players[id] !== null
-	    ? players[id].is_alive()
-	    : false);
-};
-
 var updatePlayerPosition = function(id, position) {
     if (players[id] !== null) {
 	players[id].add_position(position);
     }
 };
 
-var getPlayerPositions = function () {
+var getPlayerPositions = function (id) {
     var positions = [];
     var count = 0;
     var color = "";
@@ -152,4 +146,3 @@ exports.get_colors = get_colors;
 exports.updatePlayerPosition = updatePlayerPosition;
 exports.getPlayerPositions = getPlayerPositions;
 exports.getPlayerOrigins = getPlayerOrigins;
-exports.isPlayerAlive = isPlayerAlive;

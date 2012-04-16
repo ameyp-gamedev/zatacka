@@ -1,6 +1,5 @@
 function Player(id, name, color) {
     var deltas = {};
-    var alive = true;
     var positions = [];
 
     return {
@@ -25,9 +24,6 @@ function Player(id, name, color) {
 		y: -1
 	    };
 	},
-	is_alive: function () {
-	    return alive;
-	},
 	to_string: function () {
 	    var history = "";
 	    for (var i = 0; i < positions.length - 1; i += 1) {
@@ -39,7 +35,6 @@ function Player(id, name, color) {
 	     + "\n Name: " + name
 	     + "\n Color: " + color
 	     + "\n ID: " + id
-	     + "\n Alive: " + alive
 	     + "\n History: " + history;
 	    return output;
 	}
