@@ -1,1 +1,3 @@
 A javascript implementation of the classic game "Zatacka". Everything is client-side, no server required.
+
+Game is now feature-complete. All that remains is some CSS-beautification and possibly adding a timer.
