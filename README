@@ -1,5 +1,5 @@
 A javascript implementation of the classic game "Zatacka".
 
-Note: Development of the networked branch has been indefinitely suspended. I realized that it would require dealing with several minutae like keeping track of which rooms are empty and then cleaning them up periodically. Also, to demo it to people I would have to keep a node server running all the time, and I don't really trust my code enough to do that on my production website.
+Note: Development of the networked branch has been indefinitely suspended. I realized that it would require dealing with several minutiae like keeping track of which rooms are empty and then cleaning them up periodically. Also, to demo it to people I would have to keep a node server running all the time, and I don't really trust my code enough to do that on my production website.
 
 All further development in the foreseeable future will happen in the "local" branch.
