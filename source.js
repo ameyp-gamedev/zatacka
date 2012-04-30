@@ -90,6 +90,11 @@ var updateStatusDiv = function(color, status) {
 };
 
 var startGame = function () {
+    var i = 0;
+
+    for (i = 0; i < players.length; i += 1) {
+	players[i].start();
+    }
     setInterval(Tick, deltaTime);
 };
 
@@ -118,7 +123,9 @@ var Tick = function (deltaTime) {
     for (i = 0; i < players.length; i += 1) {
 	if (players[i].is_alive()) {
 	    segment = players[i].update_and_collide(context);
-	    draw_line(segment[0], segment[1], players[i].get_color());
+	    if (segment.length === 2) {
+		draw_line(segment[0], segment[1], players[i].get_color());
+	    }
 	    updateStatusDiv(players[i].get_color(), "ALIVE");
 
 	    aliveCount += 1;

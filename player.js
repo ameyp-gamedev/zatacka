@@ -1,16 +1,46 @@
 function Player(params) {
     var linearVelocity = 100.0;
     var angularVelocity = 0.1;
+    var glitchTime = 300;
+    var normalTime = 10000;
 
     var left = false;
     var right = false;
     var alive = true;
+
+    var should_draw = true;
 
     var pos = {
 	x: Math.random()*700,
 	y: Math.random()*500
     };
     var rot = Math.PI*Math.random();
+
+    var start = function() {
+	setTimeout(glitch, normalTime*Math.random());
+    };
+
+    var glitch = function() {
+	var timeout = glitchTime*Math.random();
+	if (timeout < 100) {
+	    timeout = 100;
+	}
+
+	should_draw = false;
+	setTimeout(restore, timeout);
+    };
+
+    var restore = function() {
+	var timeout = normalTime*Math.random();
+	if (timeout < 3000) {
+	    timeout = 3000;
+	}
+	else if (timeout > 6000) {
+	    timeout = 6000;
+	}
+	should_draw = true;
+	setTimeout(glitch, timeout);
+    };
 
     var update_and_collide = function (context) {
 	var nextPos = {};
@@ -33,7 +63,12 @@ function Player(params) {
 	oldPos = pos;
 	pos = nextPos;
 
-	return [oldPos, pos];
+	if (should_draw) {
+	    return [oldPos, pos];
+	}
+	else {
+	    return [];
+	}
     };
 
     var collide = function(context, from, to) {
@@ -119,6 +154,7 @@ function Player(params) {
 	is_alive: is_alive,
 	kill: kill,
 
+	start: start,
 	update_and_collide: update_and_collide,
 	processInput: processInput
     };
