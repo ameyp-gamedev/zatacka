@@ -39,7 +39,7 @@ var initializePlayers = function(origins) {
 	    color: "blue",
 	    leftCode: 37,
 	    rightCode: 39
-	},
+	}/*,
 	{
 	    color: "green",
 	    leftCode: 37,
@@ -54,7 +54,7 @@ var initializePlayers = function(origins) {
 	    color: "orange",
 	    leftCode: 37,
 	    rightCode: 39
-	}
+	}*/
     ];
 
     for (var i = 0; i < colors.length; i += 1) {
@@ -83,7 +83,7 @@ var onKeyUp = function (event) {
     var i;
 
     for (i = 0; i < players.length; i += 1) {
-	players[i].processInput(event.keyCode, true);
+	players[i].processInput(event.keyCode, false);
     }
 };
 

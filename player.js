@@ -52,20 +52,24 @@ function Player(params) {
 	}
 
 	if (from.x > to.x) {
+	    // moving left
 	    deltaX = from.x - to.x;
-	    origin.x = from.x;
+	    origin.x = to.x - 2;
 	}
 	else {
+	    // moving right
 	    deltaX = to.x - from.x;
-	    origin.x = from.x - 2;
+	    origin.x = to.x;
 	}
 	if (from.y > to.y) {
+	    // moving up
 	    deltaY = from.y - to.y;
-	    origin.y = from.y;
+	    origin.y = to.y - 2;
 	}
 	else {
+	    // moving down
 	    deltaY = to.y - from.y;
-	    origin.y = from.y - 2;
+	    origin.y = to.y;
 	}
 
 	collisionBox = context.getImageData(origin.x, origin.y, deltaX, deltaY).data;
@@ -77,7 +81,7 @@ function Player(params) {
 	    }
 	}
 
-	// console.log("Checking for collision from [" + from.x + "," + from.y + "] to [" + to.x + "," + to.y + "] in " + JSON.stringify(collisionBox.data));
+	console.log("Checking for collision from [" + from.x + "," + from.y + "] to [" + to.x + "," + to.y + "] in " + JSON.stringify(collisionBox.data));
     };
 
     var processInput = function(code, down) {
