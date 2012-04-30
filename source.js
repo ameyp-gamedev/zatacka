@@ -65,6 +65,26 @@ var initializePlayers = function(origins) {
 	    rightCode: colors[i].rightCode
 	}));
     }
+
+    createStatusDiv(colors);
+};
+
+var createStatusDiv = function(colors) {
+    var i;
+    var div = $('#status');
+    var html = "";
+
+    for (i = 0; i < colors.length; i += 1) {
+	html += "<font color=\"" + colors[i].color + "\">" + colors[i].color + "</font>";
+	html += "<span id=\"" + colors[i].color + "\">: ALIVE</span><br />";
+    }
+
+    console.log(html);
+    div.html(html);
+};
+
+var updateStatusDiv = function(color, status) {
+    $('#' + color).html(status);
 };
 
 var startGame = function () {
@@ -87,15 +107,32 @@ var onKeyUp = function (event) {
     }
 };
 
-var Tick = function () {
+var Tick = function (deltaTime) {
     var i;
     var segment;
+    var aliveCount = 0;
+    var winner;
 
     for (i = 0; i < players.length; i += 1) {
 	if (players[i].is_alive()) {
 	    segment = players[i].update_and_collide(context);
 	    draw_line(segment[0], segment[1], players[i].get_color());
+	    updateStatusDiv(players[i].get_color(), "ALIVE");
+
+	    aliveCount += 1;
+	    winner = players[i];
 	}
+	else {
+	    updateStatusDiv(players[i].get_color(), "DEAD");
+	}
+    }
+
+    if (aliveCount === 1) {
+	updateStatusDiv(winner.get_color(), "WINNER");
+	winner.kill();
+    }
+    else {
+	// setTimeout(Tick, deltaTime);
     }
 };
 

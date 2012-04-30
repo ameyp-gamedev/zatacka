@@ -81,7 +81,7 @@ function Player(params) {
 	    }
 	}
 
-	console.log("Checking for collision from [" + from.x + "," + from.y + "] to [" + to.x + "," + to.y + "] in " + JSON.stringify(collisionBox.data));
+	// console.log("Checking for collision from [" + from.x + "," + from.y + "] to [" + to.x + "," + to.y + "] in " + JSON.stringify(collisionBox.data));
     };
 
     var processInput = function(code, down) {
@@ -117,6 +117,8 @@ function Player(params) {
     return {
 	get_color: get_color,
 	is_alive: is_alive,
+	kill: kill,
+
 	update_and_collide: update_and_collide,
 	processInput: processInput
     };
