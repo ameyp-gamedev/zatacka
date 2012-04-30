@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Zatacka</title>
+    <script src="jquery.js"></script>
+    <script src="util.js"></script>
+    <script src="player.js"></script>
+    <script src="source.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/grid.css"></link>
+    <link rel="stylesheet" type="text/css" href="css/style.css"></link>
+  </head>
+  <body onload="init();" onkeydown="onKeyDown(event);" onkeyup="onKeyUp(event);">
+    <div class="row">
+      <div class="column grid_14" id="canvas">
+        <canvas id="renderer" width="800" height="600"></canvas>
+      </div>
+      <div class="column grid_2" id="menu">
+        <div class="row">
+          <div class="column grid_2">
+            <button type="button" onclick="startGame();">Start</button>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </body>
+</html>

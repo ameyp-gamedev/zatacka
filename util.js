@@ -45,5 +45,3 @@ var discretize = function(data) {
 
     return NaN;
 };
-
-exports.discretize = discretize;
