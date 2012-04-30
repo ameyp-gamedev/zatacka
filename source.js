@@ -39,7 +39,7 @@ var initializePlayers = function(origins) {
 	    color: "blue",
 	    leftCode: 37,
 	    rightCode: 39
-	}/*,
+	},
 	{
 	    color: "green",
 	    leftCode: 37,
@@ -54,7 +54,7 @@ var initializePlayers = function(origins) {
 	    color: "orange",
 	    leftCode: 37,
 	    rightCode: 39
-	}*/
+	}
     ];
 
     for (var i = 0; i < colors.length; i += 1) {
@@ -75,16 +75,18 @@ var createStatusDiv = function(colors) {
     var html = "";
 
     for (i = 0; i < colors.length; i += 1) {
-	html += "<font color=\"" + colors[i].color + "\">" + colors[i].color + "</font>";
-	html += "<span id=\"" + colors[i].color + "\">: ALIVE</span><br />";
+	html += "<font color=\"" + colors[i].color + "\">" + colors[i].color + "</font>: ";
+	html += "<span id=\"" + colors[i].color + "\">ALIVE</span><br />";
     }
 
-    console.log(html);
     div.html(html);
 };
 
 var updateStatusDiv = function(color, status) {
-    $('#' + color).html(status);
+    if ($('#' + color).html() !== status &&
+       $('#' + color).html() !== "WINNER") {
+	$('#' + color).html(status);
+    }
 };
 
 var startGame = function () {
