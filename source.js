@@ -32,28 +32,28 @@ var initializePlayers = function(origins) {
     var colors = [
 	{
 	    color: "red",
-	    leftCode: 37,
-	    rightCode: 39
+	    leftCode: 37, // left
+	    rightCode: 39 // right
 	},
 	{
 	    color: "blue",
-	    leftCode: 37,
-	    rightCode: 39
+	    leftCode: 81, // q
+	    rightCode: 87 // w
 	},
 	{
 	    color: "green",
-	    leftCode: 37,
-	    rightCode: 39
+	    leftCode: 85, // u
+	    rightCode: 73 // i
 	},
 	{
 	    color: "black",
-	    leftCode: 37,
-	    rightCode: 39
+	    leftCode: 17, // ctrl
+	    rightCode: 18 // alt
 	},
 	{
 	    color: "orange",
-	    leftCode: 37,
-	    rightCode: 39
+	    leftCode: 33, // pgup
+	    rightCode: 34 // pgdw
 	}
     ];
 
@@ -72,11 +72,30 @@ var initializePlayers = function(origins) {
 var createStatusDiv = function(colors) {
     var i;
     var div = $('#status');
-    var html = "";
+    var html = "<table>";
 
     for (i = 0; i < colors.length; i += 1) {
-	html += "<font color=\"" + colors[i].color + "\">" + colors[i].color + "</font>: ";
-	html += "<span id=\"" + colors[i].color + "\">ALIVE</span><br />";
+	html += "<tr>";
+	html += "<td>";
+	if (colors[i].leftCode === 37) {
+	    html += "LA/RA";
+	}
+	else if (colors[i].leftCode === 81) {
+	    html += "Q/W";
+	}
+	else if (colors[i].leftCode === 85) {
+	    html += "U/I";
+	}
+	else if (colors[i].leftCode === 17) {
+	    html += "Ctrl/Alt";
+	}
+	else if (colors[i].leftCode === 33) {
+	    html += "PgUp/PgDown";
+	}
+	html += "</td>";
+	html += "<td><font color=\"" + colors[i].color + "\">" + colors[i].color + "</font>: </td>";
+	html += "<td><span id=\"" + colors[i].color + "\">ALIVE</span></td>";
+	html += "</tr>";
     }
 
     div.html(html);
@@ -104,6 +123,12 @@ var onKeyDown = function (event) {
     for (i = 0; i < players.length; i += 1) {
 	players[i].processInput(event.keyCode, true);
     }
+    if (event.stopPropagation) {
+	event.stopPropagation();
+    }
+    if (event.preventDefault) {
+	event.preventDefault();
+    }
 };
 
 var onKeyUp = function (event) {
@@ -111,6 +136,12 @@ var onKeyUp = function (event) {
 
     for (i = 0; i < players.length; i += 1) {
 	players[i].processInput(event.keyCode, false);
+    }
+    if (event.stopPropagation) {
+	event.stopPropagation();
+    }
+    if (event.preventDefault) {
+	event.preventDefault();
     }
 };
 
